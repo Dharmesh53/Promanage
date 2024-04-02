@@ -1,17 +1,20 @@
+import axios from "axios";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { GrTask } from "react-icons/gr";
 import { HiOutlineInbox } from "react-icons/hi2";
 import { GrProjects } from "react-icons/gr";
 import { RiTeamLine } from "react-icons/ri";
 import { FaPlus } from "react-icons/fa6";
-import axios from "axios";
 import { Button } from "./ui/button";
+import { useSelector } from "react-redux";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import ProjectForm from "./Projectform";
+import TeamForm from "./Teamform";
 
 axios.defaults.withCredentials = true;
 
 const Navbar = () => {
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const user = useSelector((state) => state.auth.user);
 
   return (
     <aside className="h-[95.7vh] w-full bg-white">
@@ -39,8 +42,13 @@ const Navbar = () => {
               <GrProjects size={18} />
               Projects
             </span>
-            <span>
-              <FaPlus size={12} />
+            <span className="hover:bg-amber-500 transition-colors rounded">
+              <Dialog>
+                <DialogTrigger>
+                  <FaPlus size={12} className="mx-2" />
+                </DialogTrigger>
+                <ProjectForm user={user} />
+              </Dialog>
             </span>
           </Link>
           <Link
@@ -51,8 +59,13 @@ const Navbar = () => {
               <RiTeamLine size={18} />
               Teams
             </span>
-            <span>
-              <FaPlus size={12} />
+            <span className="hover:bg-amber-500 transition-colors rounded">
+              <Dialog>
+                <DialogTrigger>
+                  <FaPlus size={12} className="mx-2" />
+                </DialogTrigger>
+                <TeamForm user={user} />
+              </Dialog>
             </span>
           </Link>
           <Button

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
+const { Schema, model } = mongoose;
 
 const userSchema = new Schema({
   name: {
@@ -17,6 +17,11 @@ const userSchema = new Schema({
     required: true,
     minlength: 6,
   },
+  image: String,
+  projects: [{ type: Schema.Types.ObjectId, ref: "Project" }],
+  tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+  teams: [{ type: Schema.Types.ObjectId, ref: "Team" }],
+  messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
 });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = model("User", userSchema);

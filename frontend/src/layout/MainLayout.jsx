@@ -1,12 +1,14 @@
 import axios from "axios";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoIosArrowDown } from "react-icons/io";
-import { logout } from "../store/authSlice";
+import useGetUser from "@/lib/useGetUser";
 import Navbar from "@/components/Navbar";
+import { setUser } from "../store/authSlice";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,9 +22,10 @@ import { useEffect } from "react";
 
 const Layout = () => {
   const [toggle, setToggle] = useState(true);
-  const [user, setUser] = useState();
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const getUser = useGetUser();
 
   const sendReq = async () => {
     const res = await axios.post("http://localhost:5000/api/logout", null, {
@@ -38,15 +41,13 @@ const Layout = () => {
   };
 
   useEffect(() => {
-    const fetcher = async () => {
-      const res = await axios.get("http://localhost:5000/api/user", {
-        withCredentials: true,
-      });
-      const data = await res.data;
-      return data;
+    const fetcher = () => {
+      getUser().then((data) => dispatch(setUser(data)));
     };
-    fetcher().then((res) => setUser(res));
+    fetcher();
   }, []);
+  const user = useSelector((state) => state.auth.user);
+
   return (
     <div className="flex flex-col h-screen font-pops ">
       <div className="flex justify-between border-b bg-white">
@@ -65,9 +66,7 @@ const Layout = () => {
               <Avatar className="scale-75 ">
                 {user?.image && <AvatarImage src={user.image} />}
                 <AvatarFallback>
-                  {user
-                    ? user?.name[0].toUpperCase() + user?.name[1].toUpperCase()
-                    : "CN"}
+                  {user ? user?.email.slice(0, 2).toUpperCase() : "CN"}
                 </AvatarFallback>
               </Avatar>
               <IoIosArrowDown />
@@ -88,7 +87,7 @@ const Layout = () => {
         <div
           className={`transition-all ${
             toggle
-              ? "w-[12%] opacity-100 translate-x-0 "
+              ? "w-[12%] opacity-100 translate-x-0 sm:w-[25%]"
               : "w-0 opacity-0 -translate-x-full "
           }`}
         >
