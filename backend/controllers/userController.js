@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const Team = require("../models/team");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const genTokenAndSetCookie = require("../utils/genTokenAndSetCookie");
@@ -50,7 +51,9 @@ const login = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
   const id = req.id;
-  const user = await User.findById(id, "-password");
+  const user = await User.findById(id, "-password")
+    .populate("projects")
+    .populate("teams");
   if (!user) {
     return res.status(404).json({ msg: "User not found" });
   }
@@ -73,7 +76,26 @@ const logout = async (req, res, next) => {
   });
 };
 
+const getTeams = async (req, res, next) => {
+  try {
+    const id = req.id;
+    const users = await User.findById(id);
+    const teamNames = [];
+
+    for (const teamID of users.teams) {
+      const team = await Team.findById(teamID);
+      if (team) {
+        teamNames.push({ id: teamID, title: team.title });
+      }
+    }
+    return res.status(200).json({ names: teamNames });
+  } catch (err) {
+    return res.status(500);
+  }
+};
+
 exports.signup = signup;
 exports.login = login;
 exports.getUser = getUser;
 exports.logout = logout;
+exports.getTeams = getTeams;

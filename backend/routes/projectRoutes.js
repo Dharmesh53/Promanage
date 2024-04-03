@@ -4,6 +4,6 @@ const verifyToken = require("../utils/verifyToken");
 
 const router = express.Router();
 
-router.get("/create", createProject);
+router.post("/create", verifyToken, createProject);
 
 module.exports = router;

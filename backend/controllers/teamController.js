@@ -16,6 +16,11 @@ const addMembers = async (req, res) => {
       users: memberIds,
     });
     await team.save();
+    for (const id of memberIds) {
+      await User.findByIdAndUpdate(id, {
+        $push: { teams: team._id },
+      });
+    }
     return res.status(200).json({ msg: "done" });
   } catch (err) {
     console.error(err);

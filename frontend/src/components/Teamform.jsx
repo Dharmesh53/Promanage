@@ -15,10 +15,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 const Teamform = ({ user }) => {
+  const { toast } = useToast();
   const [members, setMembers] = useState([]);
   const [input, setInput] = useState("");
   const [title, setTitle] = useState("");
@@ -42,10 +44,22 @@ const Teamform = ({ user }) => {
   };
 
   const handleSubmit = async () => {
-    await axios.post("http://localhost:5000/api/team/create", {
-      title: title,
-      members,
-    });
+    try {
+      await axios.post("http://localhost:5000/api/team/create", {
+        title: title,
+        members,
+      });
+      toast({
+        title: "Done !!",
+        description: "Successfully created a new team",
+      });
+    } catch (error) {
+      toast({
+        title: "Error ",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (

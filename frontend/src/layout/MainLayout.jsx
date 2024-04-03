@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect } from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 const Layout = () => {
   const [toggle, setToggle] = useState(true);
@@ -37,7 +38,10 @@ const Layout = () => {
     throw new Error("Unable to Logout");
   };
   const handleLogout = () => {
-    sendReq().then(() => dispatch(logout()));
+    sendReq().then(() => {
+      dispatch(logout());
+      navigate("/");
+    });
   };
 
   useEffect(() => {
@@ -46,6 +50,7 @@ const Layout = () => {
     };
     fetcher();
   }, []);
+
   const user = useSelector((state) => state.auth.user);
 
   return (
@@ -91,11 +96,12 @@ const Layout = () => {
               : "w-0 opacity-0 -translate-x-full "
           }`}
         >
-          <Navbar />
+          <Navbar user={user} />
         </div>
         <div className="w-full">
           <Outlet />
         </div>
+        <Toaster />
       </div>
     </div>
   );

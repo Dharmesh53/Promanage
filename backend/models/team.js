@@ -6,6 +6,7 @@ const teamSchema = new Schema({
   title: {
     type: String,
     required: true,
+    unique: true,
   },
   users: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });

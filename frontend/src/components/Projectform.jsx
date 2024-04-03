@@ -15,18 +15,43 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "./ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
+import axios from "axios";
 
-const Projectform = () => {
+const Projectform = ({ teams }) => {
+  const { toast } = useToast();
   const [title, setTitle] = useState(null);
   const [value, setValue] = useState(null);
 
   const handleSubmit = async () => {
-    await axios.post("http://localhost:5000/api/project/create", {
-      title,
-      value,
-    });
-    console.log(value, title);
+    try {
+      const selectedTeam = teams.names?.find((team) => team.title === value);
+      if (!selectedTeam) {
+        console.log("Selected team not found");
+        return;
+      }
+      const { id: teamId } = selectedTeam;
+      const result = await axios.post(
+        "http://localhost:5000/api/project/create",
+        {
+          title,
+          teamId,
+        }
+      );
+      if (result.status == 200) {
+        toast({
+          title: "Done !!",
+          description: "Successfully created project",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -46,18 +71,30 @@ const Projectform = () => {
             Team
             <Select value={value} onValueChange={setValue}>
               <SelectTrigger className="mt-3">
-                <SelectValue placeholder="Select team for project" />
+                <SelectValue>{value || "Select team for project"}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="system">System</SelectItem>
+                {teams ? (
+                  teams?.names?.map((item, i) => (
+                    <SelectItem
+                      value={item.title}
+                      className="font-pops"
+                      key={i}
+                    >
+                      {item.title}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem className="font-pops">Loading...</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </Label>
-          <Button type="submit" onClick={handleSubmit} className="mt-3">
-            Submit
-          </Button>
         </DialogDescription>
       </DialogHeader>
+      <Button onClick={handleSubmit} className="mt-3">
+        Submit
+      </Button>
     </DialogContent>
   );
 };

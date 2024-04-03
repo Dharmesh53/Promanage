@@ -1,20 +1,30 @@
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { GrTask } from "react-icons/gr";
 import { HiOutlineInbox } from "react-icons/hi2";
 import { GrProjects } from "react-icons/gr";
 import { RiTeamLine } from "react-icons/ri";
 import { FaPlus } from "react-icons/fa6";
 import { Button } from "./ui/button";
-import { useSelector } from "react-redux";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ProjectForm from "./Projectform";
 import TeamForm from "./Teamform";
 
 axios.defaults.withCredentials = true;
 
-const Navbar = () => {
-  const user = useSelector((state) => state.auth.user);
+const Navbar = ({ user }) => {
+  const [teams, setTeams] = useState([]);
+  const location = useLocation();
+
+  const handleTeams = async () => {
+    const res = await axios.get("http://localhost:5000/api/getTeams");
+    setTeams(res.data);
+  };
+
+  const isActive = (path) => {
+    return location.pathname.includes(path);
+  };
 
   return (
     <aside className="h-[95.7vh] w-full bg-white">
@@ -22,57 +32,95 @@ const Navbar = () => {
         <div className="flex flex-col gap-2">
           <Link
             to="/tasks"
-            className="flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200 duration-300 transition-colors"
+            className={`flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200 duration-300 transition-colors ${
+              isActive("/tasks") && "bg-amber-200"
+            }`}
           >
             <GrTask size={18} />
             My Tasks
           </Link>
           <Link
             to="/inbox"
-            className="flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200 duration-300 transition-colors"
+            className={`flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200 duration-300 transition-colors ${
+              isActive("/inbox") && "bg-amber-200"
+            }`}
           >
             <HiOutlineInbox size={18} />
             Inbox
           </Link>
-          <Link
-            to="/projects"
-            className="flex items-center justify-between  p-2 m-1 rounded-lg hover:bg-amber-200 duration-300 transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <GrProjects size={18} />
-              Projects
-            </span>
-            <span className="hover:bg-amber-500 transition-colors rounded">
-              <Dialog>
-                <DialogTrigger>
-                  <FaPlus size={12} className="mx-2" />
-                </DialogTrigger>
-                <ProjectForm user={user} />
-              </Dialog>
-            </span>
-          </Link>
-          <Link
-            to="/teams"
-            className="flex items-center justify-between  p-2 m-1 rounded-lg hover:bg-amber-200 duration-300 transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <RiTeamLine size={18} />
-              Teams
-            </span>
-            <span className="hover:bg-amber-500 transition-colors rounded">
-              <Dialog>
-                <DialogTrigger>
-                  <FaPlus size={12} className="mx-2" />
-                </DialogTrigger>
-                <TeamForm user={user} />
-              </Dialog>
-            </span>
-          </Link>
+          <div>
+            <Link
+              to="/projects"
+              className={`flex items-center justify-between  p-2 m-1 rounded-lg hover:bg-amber-200 duration-300 transition-colors ${
+                isActive("/projects") && "bg-amber-200"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <GrProjects size={18} />
+                Projects
+              </span>
+              <span className="hover:bg-amber-500 transition-colors rounded">
+                <Dialog>
+                  <DialogTrigger>
+                    <FaPlus size={12} className="mx-2" onClick={handleTeams} />
+                  </DialogTrigger>
+                  <ProjectForm teams={teams} />
+                </Dialog>
+              </span>
+            </Link>
+            <div>
+              {user?.projects.map((item, i) => (
+                <Link to={`/project/${item._id}`} key={i}>
+                  <div
+                    className={`ml-9 mr-1 cursor-pointer p-1 m-auto rounded hover:bg-purple-200 transition-colors duration-300 ${
+                      isActive(`/project/${item._id}`) && "bg-purple-200"
+                    }`}
+                  >
+                    {item.title}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Link
+              to="/teams"
+              className={`flex items-center justify-between  p-2 m-1  rounded-lg hover:bg-amber-200 duration-300 transition-colors ${
+                isActive("/teams") && "bg-amber-200"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <RiTeamLine size={18} />
+                Teams
+              </span>
+              <span className="hover:bg-amber-500 transition-colors rounded">
+                <Dialog>
+                  <DialogTrigger>
+                    <FaPlus size={12} className="mx-2" />
+                  </DialogTrigger>
+                  <TeamForm user={user} />
+                </Dialog>
+              </span>
+            </Link>
+            <div>
+              {user?.teams.map((item, i) => (
+                <Link to={`/team/${item._id}`} key={i}>
+                  <div
+                    className={`ml-9 mr-1 cursor-pointer p-1 m-auto rounded mt-1 hover:bg-purple-200 transition-colors duration-300 ${
+                      isActive(`/team/${item._id}`) && "bg-purple-200"
+                    }`}
+                  >
+                    {item.title}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
           <Button
             variant="link"
             className="text-lg font-medium text-amber-500 border-t  absolute bottom-0 w-full"
           >
-            <Link to="/" className="tracking-[0.1em]">
+            <Link to="/" className="tracking-[0.1em] text-amber-500">
               ProManage
             </Link>
           </Button>
