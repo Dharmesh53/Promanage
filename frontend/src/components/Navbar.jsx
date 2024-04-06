@@ -18,7 +18,7 @@ const Navbar = ({ user }) => {
   const location = useLocation();
 
   const handleTeams = async () => {
-    const res = await axios.get("http://localhost:5000/api/getTeams");
+    const res = await axios.get("http://localhost:5000/api/getUserTeams");
     setTeams(res.data);
   };
 
@@ -27,7 +27,7 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <aside className="h-[95.7vh] w-full bg-white">
+    <aside className="h-[95.7vh]  w-full bg-white">
       <nav className="h-full border-r">
         <div className="flex flex-col gap-2">
           <Link

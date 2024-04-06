@@ -6,3 +6,11 @@ body {
   background-size: 40px 40px;
   background-image: radial-gradient(circle, #000000 1px, rgba(0, 0, 0, 0) 1px);
 }
+
+.board {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+.board::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}

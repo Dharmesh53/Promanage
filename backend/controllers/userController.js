@@ -76,7 +76,7 @@ const logout = async (req, res, next) => {
   });
 };
 
-const getTeams = async (req, res, next) => {
+const getUserTeams = async (req, res, next) => {
   try {
     const id = req.id;
     const users = await User.findById(id);
@@ -98,4 +98,4 @@ exports.signup = signup;
 exports.login = login;
 exports.getUser = getUser;
 exports.logout = logout;
-exports.getTeams = getTeams;
+exports.getUserTeams = getUserTeams;

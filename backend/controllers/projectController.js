@@ -17,4 +17,20 @@ const createProject = async (req, res) => {
   }
 };
 
+const getProject = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const project = await Project.findById(id).populate({
+      path: "teams",
+      populate: {
+        path: "users",
+      },
+    });
+    return res.status(200).json({ project });
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+};
+
 exports.createProject = createProject;
+exports.getProject = getProject;

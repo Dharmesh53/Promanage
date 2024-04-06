@@ -4,7 +4,7 @@ const {
   login,
   getUser,
   logout,
-  getTeams,
+  getUserTeams,
 } = require("../controllers/userController");
 const verifyToken = require("../utils/verifyToken");
 
@@ -14,6 +14,6 @@ router.post("/signup", signup);
 router.post("/login", login);
 router.get("/user", verifyToken, getUser);
 router.post("/logout", logout);
-router.get("/getTeams", verifyToken, getTeams);
+router.get("/getUserTeams", verifyToken, getUserTeams);
 
 module.exports = router;

@@ -90,11 +90,12 @@ const Layout = () => {
       </div>
       <div className="flex overflow-auto">
         <div
-          className={`transition-all ${
+          className={`transition-all  ${
             toggle
               ? "w-[12%] opacity-100 translate-x-0 sm:w-[25%]"
               : "w-0 opacity-0 -translate-x-full "
-          }`}
+          }
+          `}
         >
           <Navbar user={user} />
         </div>
