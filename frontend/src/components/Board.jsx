@@ -1,6 +1,4 @@
-import React, { useState } from "react";
 import Column from "./ui/column";
-import BurnBarrel from "./ui/burnBarrel";
 
 const Board = ({ cards, setCards }) => {
   return (
@@ -15,7 +13,7 @@ const Board = ({ cards, setCards }) => {
         />
         <Column
           title="In progress"
-          column="doing"
+          column="inprogess"
           Color="cyan"
           cards={cards}
           setCards={setCards}

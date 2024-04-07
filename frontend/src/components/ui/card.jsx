@@ -1,15 +1,24 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const Card = ({ title, id, column, handleDragStart }) => {
+const Card = ({
+  _id,
+  title,
+  assignee,
+  due,
+  priority,
+  status,
+  column,
+  handleDragStart,
+}) => {
   return (
     <>
-      <DropIndicator beforeId={id} column={column} />
+      <DropIndicator beforeId={_id} column={column} />
       <motion.div
         layout
-        layoutId={id}
+        layoutId={_id}
         draggable="true"
-        onDragStart={(e) => handleDragStart(e, { title, id, column })}
+        onDragStart={(e) => handleDragStart(e, { title, _id, column })}
         className="cursor-grab rounded border border-neutral-200 bg-neutral-100 p-3 active:cursor-grabbing"
       >
         <p className="text-sm">{title}</p>

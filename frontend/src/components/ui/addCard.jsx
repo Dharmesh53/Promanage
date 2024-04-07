@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import axios from "axios";
 import { useState } from "react";
 import { FiPlus } from "react-icons/fi";
 import { Button } from "./button";
@@ -28,28 +29,60 @@ import { motion } from "framer-motion";
 import { Input } from "./input";
 import { Label } from "./label";
 import { useSelector } from "react-redux";
+import { useToast } from "./use-toast";
 
 const AddCard = ({ column, setCards }) => {
   const [text, setText] = useState("");
   const [date, setDate] = useState(new Date());
   const [priority, setPriority] = useState("");
   const [assignee, setAssignee] = useState("");
+  const { toast } = useToast();
 
   const assigneList = useSelector(
     (state) => state.project?.project?.project?.teams[0]?.users
   );
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!text.trim().length) return;
+  const id = useSelector((state) => state.project?.project?._id);
 
-    const newCard = {
-      column,
-      title: text.trim(),
-      id: Math.random().toString(),
-    };
-    console.log(newCard, assignee, priority, date);
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      if (!text.trim().length) return;
+      let assigneeObject = { name: "", email: "" };
 
-    // setCards((pv) => [...pv, newCard]);
+      for (let i = 0; i < assigneList.length; i++) {
+        if (assigneList[i].email == assignee) {
+          assigneeObject = {
+            name: assigneList[i].name,
+            email: assigneList[i].email,
+          };
+          break;
+        }
+      }
+      const newCard = {
+        status: column,
+        title: text.trim(),
+        assigneeObject,
+        priority,
+        due: date,
+      };
+      const res = await axios.post(
+        `http://localhost:5000/api/project/createTask/${id}`,
+        newCard
+      );
+      if (res.status == 200) {
+        toast({
+          title: "Done!!",
+          description: "Succesfully created task",
+        });
+        setCards((pv) => [...pv, newCard]);
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
+    }
   };
 
   return (
