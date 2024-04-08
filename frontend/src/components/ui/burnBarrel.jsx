@@ -17,7 +17,7 @@ const BurnBarrel = ({ setCards }) => {
   const handleDragEnd = (e) => {
     const cardId = e.dataTransfer.getData("cardId");
 
-    setCards((pv) => pv.filter((c) => c.id !== cardId));
+    setCards((pv) => pv.filter((c) => c._id !== cardId));
 
     setActive(false);
   };

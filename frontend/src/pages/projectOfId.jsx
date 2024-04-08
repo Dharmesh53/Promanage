@@ -17,7 +17,7 @@ const projectOfId = () => {
   const fetcher = async () => {
     const res = await axios.get(`http://localhost:5000/api/project/${id}`);
     const result = res.data;
-    setCards(result.tasks);
+    setCards(result.project.tasks);
     dispatch(setProject(result));
   };
 

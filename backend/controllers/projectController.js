@@ -29,7 +29,7 @@ const getProject = async (req, res) => {
         },
       })
       .populate("tasks");
-    return res.status(200).json(project);
+    return res.status(200).json({ project: project });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
@@ -58,7 +58,10 @@ const updateProjectTask = async (req, res) => {
   try {
     const id = req.params.id;
     const cards = req.body;
-    await Project.findByIdAndUpdate(id, { $set: { tasks: cards } });
+    const newCards = cards.map((card) => card._id);
+    console.log(newCards);
+    // await Task.findByIdAndUpdate(cards[i]._id);
+    // await Project.findByIdAndUpdate(id, { $set: { tasks: cards } });
     return res.status(200).json({ msg: "done" });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
