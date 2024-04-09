@@ -1,4 +1,5 @@
 import Column from "./ui/column";
+import { FiPlusCircle } from "react-icons/fi";
 
 const Board = ({ cards, setCards }) => {
   return (
@@ -32,6 +33,9 @@ const Board = ({ cards, setCards }) => {
           cards={cards}
           setCards={setCards}
         />
+        <button className="h-[80vh] flex w-full justify-center items-center cursor-pointer rounded border border-neutral-200 bg-neutral-50">
+          <FiPlusCircle size={30} className="text-neutral-400" />
+        </button>
       </div>
     </div>
   );

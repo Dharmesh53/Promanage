@@ -36,16 +36,19 @@ const AddCard = ({ column, setCards }) => {
   const [date, setDate] = useState(new Date());
   const [priority, setPriority] = useState("");
   const [assignee, setAssignee] = useState("");
+  const [clicked, setClicked] = useState(false);
   const { toast } = useToast();
 
   const assigneList = useSelector(
     (state) => state.project?.project?.project?.teams[0]?.users
   );
-  const id = useSelector((state) => state.project?.project?._id);
+  const id = useSelector((state) => state.project?.project?.project?._id);
 
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      setClicked((prev) => !prev);
+
       if (!text.trim().length) return;
       let assigneeObject = { name: "", email: "" };
 
@@ -75,6 +78,7 @@ const AddCard = ({ column, setCards }) => {
           description: "Succesfully created task",
         });
         setCards((pv) => [...pv, newCard]);
+        setClicked((prev) => !prev);
       }
     } catch (error) {
       toast({
@@ -154,7 +158,13 @@ const AddCard = ({ column, setCards }) => {
                 <SelectItem value="High">High</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={handleSubmit}>Create Task</Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={clicked}
+              className={`${clicked && "bg-gray-400 cursor-progress"}`}
+            >
+              Create Task
+            </Button>
           </DialogDescription>
         </DialogHeader>
       </DialogContent>
