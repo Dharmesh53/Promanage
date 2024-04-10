@@ -2,16 +2,8 @@ import { useState } from "react";
 import Card from "./card";
 import AddCard from "./addCard";
 import { DropIndicator } from "./card";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
-const Column = ({ title, Color, cards, column, setCards }) => {
+const Column = ({ title, bgColor, txtColor, cards, column, setCards }) => {
   const [active, setActive] = useState(false);
 
   const handleDragStart = (e, card) => {
@@ -114,9 +106,9 @@ const Column = ({ title, Color, cards, column, setCards }) => {
   const filteredCards = cards.filter((c) => c.status === column);
 
   return (
-    <div className="w-[22%] h-[80vh]  shrink-0 relative">
+    <div className="w-1/4 h-[80vh]  shrink-0 relative">
       <div
-        className={`flex items-center absolute w-full justify-between bg-${Color}-200 text-${Color}-600 rounded p-2`}
+        className={`flex items-center absolute w-full justify-between font-medium ${bgColor} ${txtColor} rounded p-2`}
       >
         <h3>{title}</h3>
         <span>{filteredCards.length}</span>

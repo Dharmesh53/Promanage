@@ -150,7 +150,7 @@ const AddCard = ({ column, setCards }) => {
             <Label htmlFor="priority">Priority</Label>
             <Select value={priority} onValueChange={setPriority}>
               <SelectTrigger>
-                <SelectValue placeholder="Medium" />
+                <SelectValue placeholder="Select priority" />
               </SelectTrigger>
               <SelectContent className="font-pops">
                 <SelectItem value="Low">Low</SelectItem>

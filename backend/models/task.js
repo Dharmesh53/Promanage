@@ -23,25 +23,12 @@ const taskSchema = new Schema({
   status: String,
   progess: {
     type: String,
-    enum: ["On Track", "Off track", "At risk", ""],
+    enum: ["On track", "Off track", "At risk", ""],
     default: "",
   },
   due: Date,
   start: Date,
   priority: { type: String, enum: ["Low", "Medium", "High", ""] },
-  subtasks: [
-    {
-      title: String,
-      assignee: { type: Schema.Types.ObjectId, ref: "User" },
-      description: String,
-      due: Date,
-      progess: {
-        type: String,
-        enum: ["On Track", "Off track", "At risk", ""],
-        default: "",
-      },
-    },
-  ],
 });
 
 module.exports = model("Task", taskSchema);
