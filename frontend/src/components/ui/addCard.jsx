@@ -41,7 +41,7 @@ const AddCard = ({ column, setCards }) => {
   const assigneList = useSelector(
     (state) => state.project?.project?.project?.teams[0]?.users
   );
-  const id = useSelector((state) => state.project?.project?._id);
+  const id = useSelector((state) => state.project?.project?.project?._id);
 
   const handleSubmit = async (e) => {
     try {

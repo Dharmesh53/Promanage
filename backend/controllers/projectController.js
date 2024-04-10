@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const Project = require("../models/project");
 const Task = require("../models/task");
+const mongoose = require("mongoose");
 
 const createProject = async (req, res) => {
   try {
@@ -58,10 +59,29 @@ const updateProjectTask = async (req, res) => {
   try {
     const id = req.params.id;
     const cards = req.body;
+    const project = await Project.findById(id);
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
     const newCards = cards.map((card) => card._id);
-    console.log(newCards);
-    // await Task.findByIdAndUpdate(cards[i]._id);
-    // await Project.findByIdAndUpdate(id, { $set: { tasks: cards } });
+    const deletedCards = project.tasks.filter(
+      (task) => !newCards.includes(String(task))
+    );
+    let remainingCards = project.tasks.filter((task) =>
+      newCards.includes(String(task))
+    );
+    for (let i = 0; i < deletedCards.length; i++) {
+      await Task.findByIdAndDelete(deletedCards[i]);
+    }
+    project.tasks = [...remainingCards];
+    await project.save();
+    remainingCards = remainingCards.map((task) => String(task));
+    for (let i = 0; i < remainingCards.length; i++) {
+      const completeCard = cards.find((card) =>
+        remainingCards.includes(String(card._id))
+      );
+      await Task.findOneAndReplace({ _id: remainingCards[i] }, completeCard);
+    }
     return res.status(200).json({ msg: "done" });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
