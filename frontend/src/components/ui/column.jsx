@@ -2,6 +2,14 @@ import { useState } from "react";
 import Card from "./card";
 import AddCard from "./addCard";
 import { DropIndicator } from "./card";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Column = ({ title, Color, cards, column, setCards }) => {
   const [active, setActive] = useState(false);
