@@ -10,6 +10,7 @@ import LoginLayout from "./layout/LoginLayout";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import Projects from "./pages/Projects";
+import UserTasks from "./pages/UserTasks";
 
 function App() {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
@@ -22,6 +23,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="projects" element={<Projects />} />
             <Route path="project/:id" element={<ProjectOfId />} />
+            <Route path="tasks" element={<UserTasks />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="*" element={<NoMatch />} />
           </Route>

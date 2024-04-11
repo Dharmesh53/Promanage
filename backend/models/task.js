@@ -29,6 +29,14 @@ const taskSchema = new Schema({
   due: Date,
   start: Date,
   priority: { type: String, enum: ["Low", "Medium", "High", ""] },
+  project: {
+    type: Schema.Types.ObjectId,
+    ref: "Project",
+  },
+  createdBy: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = model("Task", taskSchema);

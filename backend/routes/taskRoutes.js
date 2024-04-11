@@ -1,8 +1,11 @@
 const express = require("express");
 
-const { updateTask } = require("../controllers/taskController");
+const { getTask, updateTask } = require("../controllers/taskController");
+const verifyToken = require("../utils/verifyToken");
 
 const router = express.Router();
+
+router.get("/", verifyToken, getTask);
 
 router.put("/updateTask/:id", updateTask);
 

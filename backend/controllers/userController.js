@@ -94,8 +94,11 @@ const getUserTeams = async (req, res, next) => {
   }
 };
 
+const updateUserTasks = async (req, res) => {};
+
 exports.signup = signup;
 exports.login = login;
 exports.getUser = getUser;
 exports.logout = logout;
 exports.getUserTeams = getUserTeams;
+exports.updateUserTasks = updateUserTasks;

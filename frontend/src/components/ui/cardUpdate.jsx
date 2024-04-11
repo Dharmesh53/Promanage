@@ -40,7 +40,7 @@ const cardUpdate = (props) => {
   } = props;
   const [newTitle, setNewTitle] = useState(title);
   const [newDescription, setNewDescription] = useState(description);
-  const [newAssignee, setNewAssignee] = useState(assignee.email);
+  const [newAssignee, setNewAssignee] = useState(assignee?.email);
   const [newPriority, setNewPriority] = useState(priority);
   const [date, setDate] = useState(due);
   const [newProgess, setNewProgess] = useState(progess);

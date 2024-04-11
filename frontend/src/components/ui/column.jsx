@@ -106,7 +106,7 @@ const Column = ({ title, bgColor, txtColor, cards, column, setCards }) => {
   const filteredCards = cards.filter((c) => c.status === column);
 
   return (
-    <div className="w-1/4 h-[80vh]  shrink-0 relative">
+    <div className="w-[24.6%] h-[80vh]  shrink-0 relative">
       <div
         className={`flex items-center absolute w-full justify-between font-medium ${bgColor} ${txtColor} rounded p-2`}
       >
