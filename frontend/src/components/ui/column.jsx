@@ -117,12 +117,19 @@ const Column = ({ title, bgColor, txtColor, cards, column, setCards }) => {
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`h-full w-full rounded p-2 pt-12 overflow-y-scroll transition-colors ${
+        className={`h-full w-full rounded p-2 pt-12 flex flex-col overflow-y-scroll transition-colors ${
           active ? "bg-neutral-200/40" : "bg-neutral-50"
         }`}
       >
         {filteredCards.map((c) => {
-          return <Card key={c._id} {...c} handleDragStart={handleDragStart} />;
+          return (
+            <Card
+              key={c._id}
+              {...c}
+              setCards={setCards}
+              handleDragStart={handleDragStart}
+            />
+          );
         })}
         <DropIndicator beforeId={null} column={column} />
         <AddCard column={column} setCards={setCards} />

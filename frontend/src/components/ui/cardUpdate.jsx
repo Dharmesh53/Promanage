@@ -25,20 +25,76 @@ import { useState } from "react";
 import { Textarea } from "./textarea";
 import { useSelector } from "react-redux";
 import { Button } from "./button";
+import axios from "axios";
 
 const cardUpdate = (props) => {
-  const { _id, title, assignee, due, priority } = props;
+  const {
+    _id,
+    title,
+    assignee,
+    due,
+    priority,
+    description,
+    progess,
+    setCards,
+  } = props;
   const [newTitle, setNewTitle] = useState(title);
-  const [newDescription, setNewDescription] = useState("d");
+  const [newDescription, setNewDescription] = useState(description);
   const [newAssignee, setNewAssignee] = useState(assignee.email);
   const [newPriority, setNewPriority] = useState(priority);
   const [date, setDate] = useState(due);
-  const [progess, setProgess] = useState("");
+  const [newProgess, setNewProgess] = useState(progess);
   const [clicked, setClicked] = useState(false);
 
   const assigneList = useSelector(
     (state) => state.project?.project?.project?.teams[0]?.users
   );
+
+  const handleUpdateTask = async (e) => {
+    setClicked((prev) => !prev);
+    e.preventDefault();
+    let assigneeObject = { name: "", email: "" };
+
+    for (let i = 0; i < assigneList.length; i++) {
+      if (assigneList[i].email == newAssignee) {
+        assigneeObject = {
+          name: assigneList[i].name,
+          email: assigneList[i].email,
+        };
+        break;
+      }
+    }
+    await axios.put(`http://localhost:5000/api/task/updateTask/${_id}`, {
+      title: newTitle,
+      description: newDescription,
+      assignee: assigneeObject,
+      priority: newPriority,
+      due: date,
+      progess: newProgess,
+    });
+    setCards((cards) => {
+      const index = cards.findIndex((card) => card._id === _id);
+      if (index !== -1) {
+        const updatedCard = {
+          ...cards[index],
+          description: newDescription,
+          title: newTitle,
+          assignee: assigneeObject,
+          priority: newPriority,
+          progess: newProgess,
+          due: date,
+        };
+        const updatedCards = [
+          ...cards.slice(0, index),
+          updatedCard,
+          ...cards.slice(index + 1),
+        ];
+        return updatedCards;
+      }
+      return cards;
+    });
+    setClicked((prev) => !prev);
+  };
 
   return (
     <SheetContent className=" font-pops">
@@ -96,7 +152,7 @@ const cardUpdate = (props) => {
             </SelectContent>
           </Select>
           <Label htmlFor="progess">Progress</Label>
-          <Select value={progess} onValueChange={setProgess}>
+          <Select value={newProgess} onValueChange={setNewProgess}>
             <SelectTrigger>
               <SelectValue placeholder="Progress of task" />
             </SelectTrigger>
@@ -118,7 +174,8 @@ const cardUpdate = (props) => {
             </SelectContent>
           </Select>
           <Button
-            onClick={() => setClicked((prev) => !prev)}
+            onClick={handleUpdateTask}
+            disabled={clicked}
             className={`${clicked && "bg-gray-400  cursor-progress"}`}
           >
             Update Task

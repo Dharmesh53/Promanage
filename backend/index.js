@@ -8,6 +8,7 @@ const connectToDB = require("./utils/connectToDB");
 const userRoutes = require("./routes/userRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const teamRoutes = require("./routes/teamRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 
 const app = express();
 app.use(morgan("dev"));
@@ -17,6 +18,7 @@ app.use(express.json()); //order matter in middlewares
 app.use("/api", userRoutes);
 app.use("/api/project", projectRoutes);
 app.use("/api/team", teamRoutes);
+app.use("/api/task", taskRoutes);
 
 connectToDB().then(() => {
   app.listen(5000, () => {

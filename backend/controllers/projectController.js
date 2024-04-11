@@ -80,6 +80,7 @@ const updateProjectTask = async (req, res) => {
       const completeCard = cards.find((card) =>
         remainingCards.includes(String(card._id))
       );
+      delete completeCard._id;
       await Task.findOneAndReplace({ _id: remainingCards[i] }, completeCard);
     }
     return res.status(200).json({ msg: "done" });

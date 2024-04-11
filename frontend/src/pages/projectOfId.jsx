@@ -6,7 +6,6 @@ import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setProject } from "../store/projectSlice";
 import BurnBarrel from "@/components/ui/burnBarrel";
-import { Button } from "@/components/ui/button";
 
 const projectOfId = () => {
   const { id } = useParams();
@@ -22,7 +21,7 @@ const projectOfId = () => {
   };
 
   const handleSave = async () => {
-    const res = await axios.put(
+    await axios.put(
       `http://localhost:5000/api/project/updateTask/${id}`,
       cards
     );
@@ -30,7 +29,11 @@ const projectOfId = () => {
 
   useEffect(() => {
     hasChecked && localStorage.setItem("cards", JSON.stringify(cards));
-  }, [cards]);
+    if (hasChecked) {
+      const intervalId = setTimeout(() => handleSave(), 10000);
+      return () => clearTimeout(intervalId);
+    }
+  }, [hasChecked, cards]);
 
   useEffect(() => {
     const cardData = localStorage.getItem("cards");
@@ -58,9 +61,6 @@ const projectOfId = () => {
         <TabsContent value="overview">description and team</TabsContent>
         <TabsContent value="files">your files</TabsContent>
       </Tabs>
-      <Button className="absolute top-4 right-4" onClick={handleSave}>
-        Save
-      </Button>
     </div>
   );
 };

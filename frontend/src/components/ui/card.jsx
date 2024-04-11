@@ -23,6 +23,9 @@ const Card = (props) => {
     due,
     priority,
     status,
+    description,
+    progess,
+    setCards,
     column,
     handleDragStart,
   } = props;
@@ -40,10 +43,23 @@ const Card = (props) => {
               className="cursor-grab text-sm rounded border border-neutral-200 bg-white p-2 active:cursor-grabbing"
             >
               <div className="flex justify-between items-center">
-                <span className="font-semibold">
+                <span className="font-medium">
                   {title[0].toUpperCase() + title.slice(1)}
                 </span>
                 <span className="mr-1">
+                  {progess && (
+                    <span
+                      className={` rounded-full text-xs  px-2  border ${
+                        progess === "At risk"
+                          ? "bg-orange-200 border-orange-600"
+                          : progess === "Off track"
+                          ? "bg-yellow-200 border-yellow-600"
+                          : "bg-teal-200 border-teal-600"
+                      } `}
+                    >
+                      {progess}
+                    </span>
+                  )}
                   <span
                     className={` rounded-full text-xs  px-2  border ${
                       priority === "High"
@@ -93,7 +109,7 @@ const Card = (props) => {
             </ContextMenuContent>
           </SheetTrigger>
         </ContextMenu>
-        <CardUpdate {...props} />
+        <CardUpdate {...props} setCards={setCards} />
       </Sheet>
     </>
   );
