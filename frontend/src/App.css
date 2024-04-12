@@ -14,3 +14,16 @@ body {
 .board::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
+
+.animate-spin-reverse {
+  animation: spinReverse 1s linear infinite;
+}
+
+@keyframes spinReverse {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}

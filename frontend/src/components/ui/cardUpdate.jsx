@@ -37,6 +37,7 @@ const cardUpdate = (props) => {
     description,
     progess,
     setCards,
+    userBoard,
   } = props;
   const [newTitle, setNewTitle] = useState(title);
   const [newDescription, setNewDescription] = useState(description);
@@ -134,23 +135,27 @@ const cardUpdate = (props) => {
               />
             </PopoverContent>
           </Popover>
-          <Label htmlFor="newAssignee">Change Assignee</Label>
-          <Select
-            name="newAssignee"
-            value={newAssignee}
-            onValueChange={setNewAssignee}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select assignee for task" />
-            </SelectTrigger>
-            <SelectContent className="font-pops">
-              {assigneList?.map((al, i) => (
-                <SelectItem key={i} value={al.email}>
-                  {al.email}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {!userBoard && (
+            <>
+              <Label htmlFor="newAssignee">Change Assignee</Label>
+              <Select
+                name="newAssignee"
+                value={newAssignee}
+                onValueChange={setNewAssignee}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignee for task" />
+                </SelectTrigger>
+                <SelectContent className="font-pops">
+                  {assigneList?.map((al, i) => (
+                    <SelectItem key={i} value={al.email}>
+                      {al.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
           <Label htmlFor="progess">Progress</Label>
           <Select value={newProgess} onValueChange={setNewProgess}>
             <SelectTrigger>

@@ -31,7 +31,7 @@ import { Label } from "./label";
 import { useSelector } from "react-redux";
 import { useToast } from "./use-toast";
 
-const AddCard = ({ column, setCards }) => {
+const AddCard = ({ column, setCards, userBoard }) => {
   const [text, setText] = useState("");
   const [date, setDate] = useState(new Date());
   const [priority, setPriority] = useState("");
@@ -52,15 +52,16 @@ const AddCard = ({ column, setCards }) => {
       setClicked((prev) => !prev);
 
       if (!text.trim().length) return;
-      let assigneeObject = { name: "", email: "" };
-
-      for (let i = 0; i < assigneList.length; i++) {
-        if (assigneList[i].email == assignee) {
-          assigneeObject = {
-            name: assigneList[i].name,
-            email: assigneList[i].email,
-          };
-          break;
+      let assigneeObject = { name: user.name, email: user.email };
+      if (!userBoard) {
+        for (let i = 0; i < assigneList.length; i++) {
+          if (assigneList[i].email == assignee) {
+            assigneeObject = {
+              name: assigneList[i].name,
+              email: assigneList[i].email,
+            };
+            break;
+          }
         }
       }
       const newCard = {
@@ -69,7 +70,7 @@ const AddCard = ({ column, setCards }) => {
         assigneeObject,
         priority,
         due: date,
-        project: id,
+        project: userBoard ? id : "",
         createdBy: user.email,
       };
       const res = await axios.post(
@@ -116,19 +117,23 @@ const AddCard = ({ column, setCards }) => {
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
-            <Label htmlFor="assignee">Assignee</Label>
-            <Select value={assignee} onValueChange={setAssignee}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select assignee for task" />
-              </SelectTrigger>
-              <SelectContent className="font-pops">
-                {assigneList?.map((al, i) => (
-                  <SelectItem key={i} value={al.email}>
-                    {al.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {!userBoard && (
+              <>
+                <Label htmlFor="assignee">Assignee</Label>
+                <Select value={assignee} onValueChange={setAssignee}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select assignee for task" />
+                  </SelectTrigger>
+                  <SelectContent className="font-pops">
+                    {assigneList?.map((al, i) => (
+                      <SelectItem key={i} value={al.email}>
+                        {al.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
             <Label htmlFor="calender">Due date</Label>
             <Popover>
               <PopoverTrigger asChild>

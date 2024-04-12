@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/context-menu";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import CardUpdate from "./cardUpdate";
+import { useSelector } from "react-redux";
+import { useToast } from "./use-toast";
 
 const Card = (props) => {
+  const { toast } = useToast();
   const {
     _id,
     title,
@@ -28,7 +31,12 @@ const Card = (props) => {
     setCards,
     column,
     handleDragStart,
+    createdBy,
+    userBoard,
   } = props;
+
+  const user = useSelector((state) => state.auth.user);
+
   return (
     <>
       <Sheet>
@@ -40,7 +48,11 @@ const Card = (props) => {
               layoutId={_id}
               draggable="true"
               onDragStart={(e) => handleDragStart(e, { title, _id, column })}
-              className="cursor-grab text-sm rounded border border-neutral-200 bg-white p-2 active:cursor-grabbing"
+              className={`cursor-grab text-sm rounded border ${
+                user?.email === createdBy
+                  ? "border-neutral-400"
+                  : "border-neutral-200"
+              } bg-white p-2 active:cursor-grabbing`}
             >
               <div className="flex justify-between items-center">
                 <span className="font-medium">
@@ -104,12 +116,14 @@ const Card = (props) => {
             </motion.div>
           </ContextMenuTrigger>
           <SheetTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem className="font-pops">Edit</ContextMenuItem>
-            </ContextMenuContent>
+            {createdBy === user?.email && (
+              <ContextMenuContent>
+                <ContextMenuItem className="font-pops">Edit</ContextMenuItem>
+              </ContextMenuContent>
+            )}
           </SheetTrigger>
         </ContextMenu>
-        <CardUpdate {...props} setCards={setCards} />
+        {createdBy === user?.email && <CardUpdate {...props} />}
       </Sheet>
     </>
   );

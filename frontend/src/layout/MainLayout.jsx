@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { logout } from "../store/authSlice";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -99,7 +100,7 @@ const Layout = () => {
         >
           <Navbar user={user} />
         </div>
-        <div className="w-full">
+        <div className="w-full overflow-hidden">
           <Outlet />
         </div>
         <Toaster />

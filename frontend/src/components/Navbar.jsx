@@ -72,7 +72,7 @@ const Navbar = ({ user }) => {
               {user?.projects.map((item, i) => (
                 <Link to={`/project/${item._id}`} key={i}>
                   <div
-                    className={`ml-9 mr-1 cursor-pointer p-1 m-auto rounded hover:bg-purple-200 transition-colors duration-300 ${
+                    className={`ml-9 mr-1 mb-2 cursor-pointer p-1 m-auto rounded hover:bg-purple-200 transition-colors duration-300 ${
                       isActive(`/project/${item._id}`) && "bg-purple-200"
                     }`}
                   >

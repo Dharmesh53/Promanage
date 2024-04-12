@@ -1,9 +1,8 @@
 import Column from "./ui/column";
-import { FiPlusCircle } from "react-icons/fi";
 
-const Board = ({ cards, setCards }) => {
+const Board = ({ cards, setCards, userBoard }) => {
   return (
-    <div className="h-full">
+    <div>
       <div className="flex gap-2 board  overflow-scroll">
         {DEFAULT_COLUMNS.map((column) => (
           <Column
@@ -14,11 +13,9 @@ const Board = ({ cards, setCards }) => {
             txtColor={column.txtColor}
             cards={cards}
             setCards={setCards}
+            userBoard={userBoard}
           />
         ))}
-        {/* <button className="h-[80vh] flex w-full justify-center items-center cursor-pointer rounded border border-neutral-200 bg-neutral-50">
-          <FiPlusCircle size={30} className="text-neutral-400" />
-        </button> */}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const Team = require("../models/team");
+const Task = require("../models/task");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const genTokenAndSetCookie = require("../utils/genTokenAndSetCookie");
@@ -94,7 +95,18 @@ const getUserTeams = async (req, res, next) => {
   }
 };
 
-const updateUserTasks = async (req, res) => {};
+const updateUserTasks = async (req, res) => {
+  try {
+    const Cards = req.body;
+    const newCards = Cards.map((card) => card._id);
+    for (let i = 0; i < newCards.length; i++) {
+      await Task.findOneAndReplace({ _id: newCards[i] }, Cards[i]);
+    }
+    return res.status(200).json({ msg: "Updated" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 exports.signup = signup;
 exports.login = login;

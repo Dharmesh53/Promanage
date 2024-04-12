@@ -3,7 +3,15 @@ import Card from "./card";
 import AddCard from "./addCard";
 import { DropIndicator } from "./card";
 
-const Column = ({ title, bgColor, txtColor, cards, column, setCards }) => {
+const Column = ({
+  title,
+  bgColor,
+  txtColor,
+  cards,
+  column,
+  setCards,
+  userBoard,
+}) => {
   const [active, setActive] = useState(false);
 
   const handleDragStart = (e, card) => {
@@ -127,12 +135,13 @@ const Column = ({ title, bgColor, txtColor, cards, column, setCards }) => {
               key={c._id}
               {...c}
               setCards={setCards}
+              userBoard={userBoard}
               handleDragStart={handleDragStart}
             />
           );
         })}
         <DropIndicator beforeId={null} column={column} />
-        <AddCard column={column} setCards={setCards} />
+        <AddCard column={column} setCards={setCards} userBoard={userBoard} />
       </div>
     </div>
   );

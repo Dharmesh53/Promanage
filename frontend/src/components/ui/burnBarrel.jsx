@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { FaFire } from "react-icons/fa";
 import { IoTrashBinOutline } from "react-icons/io5";
+import { useSelector } from "react-redux";
+import { useToast } from "./use-toast";
 
 const BurnBarrel = ({ setCards }) => {
+  const { toast } = useToast();
   const [active, setActive] = useState(false);
-
+  const user = useSelector((state) => state.auth.user);
   const handleDragOver = (e) => {
     e.preventDefault();
     setActive(true);
@@ -17,7 +20,19 @@ const BurnBarrel = ({ setCards }) => {
   const handleDragEnd = (e) => {
     const cardId = e.dataTransfer.getData("cardId");
 
-    setCards((pv) => pv.filter((c) => c._id !== cardId));
+    setCards((pv) =>
+      pv.filter((c) => {
+        if (c._id === cardId && user.email !== c.createdBy && c.project) {
+          toast({
+            title: "Error",
+            description: "You're can't delete a task that you didn't created",
+            variant: "destructive",
+          });
+          return true;
+        }
+        return c._id !== cardId;
+      })
+    );
 
     setActive(false);
   };
