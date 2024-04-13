@@ -43,8 +43,10 @@ const AddCard = ({ column, setCards, userBoard }) => {
     (state) => state.project?.project?.project?.teams[0]?.users
   );
   const user = useSelector((state) => state.auth.user);
-
-  const id = useSelector((state) => state.project?.project?.project?._id);
+  let id = "";
+  if (!userBoard) {
+    id = useSelector((state) => state.project?.project?.project?._id);
+  }
 
   const handleSubmit = async (e) => {
     try {
@@ -70,11 +72,10 @@ const AddCard = ({ column, setCards, userBoard }) => {
         assigneeObject,
         priority,
         due: date,
-        project: userBoard ? id : "",
         createdBy: user.email,
       };
       const res = await axios.post(
-        `http://localhost:5000/api/project/createTask/${id}`,
+        `http://localhost:5000/api/project/createTask?id=${id}`,
         newCard
       );
       if (res.status == 200) {
@@ -83,8 +84,8 @@ const AddCard = ({ column, setCards, userBoard }) => {
           description: "Succesfully created task",
         });
         setCards((pv) => [...pv, res.data.task]);
-        setClicked((prev) => !prev);
       }
+      setClicked((prev) => !prev);
     } catch (error) {
       toast({
         variant: "destructive",

@@ -38,28 +38,49 @@ const getProject = async (req, res) => {
   }
 };
 
-const createProjectTask = async (req, res) => {
+const updateProject = async (req, res) => {
   try {
     const id = req.params.id;
-    const { title, status, assigneeObject, due, priority, project, createdBy } =
+    const { title, description, progess } = req.body;
+    console.log(id, title, description, progess);
+    await Project.findByIdAndUpdate(id, {
+      title,
+      description,
+      progess,
+    });
+    return res.status(200).json({ msg: "done" });
+  } catch (error) {
+    return res.status(200).json({ msg: error.message });
+  }
+};
+
+const createProjectTask = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const { title, status, assigneeObject, due, priority, createdBy } =
       req.body;
-    const task = new Task({
+    const taskData = {
       title,
       status,
       assignee: assigneeObject,
       due,
       priority,
-      project,
       createdBy,
-    });
+    };
+
+    if (id) taskData.project = id;
+
+    const task = new Task(taskData);
     await task.save();
     await User.findOneAndUpdate(
       { email: assigneeObject.email },
       { $push: { tasks: task._id } }
     );
-    await Project.findByIdAndUpdate(id, {
-      $push: { tasks: task._id },
-    });
+    if (id) {
+      await Project.findByIdAndUpdate(id, {
+        $push: { tasks: task._id },
+      });
+    }
     return res.status(200).json({ task });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
@@ -140,5 +161,6 @@ const updateProjectTask = async (req, res) => {
 
 exports.createProject = createProject;
 exports.getProject = getProject;
+exports.updateProject = updateProject;
 exports.createProjectTask = createProjectTask;
 exports.updateProjectTask = updateProjectTask;

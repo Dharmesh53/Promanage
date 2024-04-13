@@ -8,7 +8,7 @@ const projectSchema = new Schema({
     required: true,
   },
   description: String,
-  status: String,
+  progess: String,
   tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
   teams: [{ type: Schema.Types.ObjectId, ref: "Team" }],
   files: [String],

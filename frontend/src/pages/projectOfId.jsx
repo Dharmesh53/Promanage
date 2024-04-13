@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { setProject } from "../store/projectSlice";
 import { useToast } from "@/components/ui/use-toast";
 import BurnBarrel from "@/components/ui/burnBarrel";
+import ProjectDetails from "@/components/ProjectDetails";
 
 const projectOfId = () => {
   const { id } = useParams();
@@ -72,7 +73,9 @@ const projectOfId = () => {
             </>
           )}
         </TabsContent>
-        <TabsContent value="overview">description and team</TabsContent>
+        <TabsContent value="overview">
+          <ProjectDetails />
+        </TabsContent>
         <TabsContent value="files">your files</TabsContent>
       </Tabs>
       <Button
