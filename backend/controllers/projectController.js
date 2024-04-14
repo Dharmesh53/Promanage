@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const Project = require("../models/project");
 const Task = require("../models/task");
+const Team = require("../models/team");
 const mongoose = require("mongoose");
 const { ObjectId } = require("mongoose").Types;
 const Cache = require("../utils/Cache");
@@ -181,18 +182,42 @@ const updateProjectTask = async (req, res) => {
 
 const deleteProjectTeam = async (req, res) => {
   try {
-    const id = req.params.pid;
-    const teamId = req.params.tid;
-    const project = await Project.findById(id);
+    const { pid: projectId, tid: teamId } = req.params;
+    const code = req.query.code;
+    const project = await Project.findById(projectId);
+    const team = await Team.findById(teamId).populate("users");
+
     if (!project) {
       return res.status(404).json({ msg: "Project not found" });
     }
     if (!project.teams.includes(teamId)) {
       return res.status(400).json({ msg: "Team not found in project" });
     }
+    let teamMembers = team.users.map((user) => user.email);
 
-    // await Project.findByIdAndUpdate(id, { $pull: { teams: teamId } });
-    return res.status(200).json({ msg: "Team removed from project" });
+    if (code == 1) {
+      project.tasks.forEach(async (task) => {
+        let taskDetails = await Task.findById(task);
+        if (
+          taskDetails?.assignee?.email &&
+          teamMembers.includes(taskDetails.assignee.email)
+        ) {
+          await Task.findByIdAndDelete(task);
+        }
+      });
+    }
+    if (code == 2) {
+      project.tasks.forEach(async (task) => {
+        let taskDetails = await Task.findById(task);
+        if (teamMembers.includes(taskDetails.assignee.email)) {
+          taskDetails.assignee = { name: "", email: "" };
+          await taskDetails.save();
+        }
+      });
+    }
+
+    await Project.findByIdAndUpdate(projectId, { $pull: { teams: teamId } });
+    return res.status(200).json({ msg: "done" });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }

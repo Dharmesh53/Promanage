@@ -12,10 +12,6 @@ const verifyToken = require("../utils/verifyToken");
 
 const router = express.Router();
 
-function log(req, res, next) {
-  console.log(req);
-  next();
-}
 router.get("/:id", getProject);
 
 router.post("/create", verifyToken, createProject);
@@ -25,6 +21,6 @@ router.post("/addTeam/:id", addNewTeam);
 router.put("/updateTask/:id", updateProjectTask);
 router.put("/updateProject/:id", updateProject);
 
-router.delete("removeTeam/:pid/:tid", log, deleteProjectTeam);
+router.delete("/removeTeam/:pid/:tid", deleteProjectTeam);
 
 module.exports = router;

@@ -240,7 +240,7 @@ const ProjectDetails = () => {
                         </AlertDialogTitle>
                         <AlertDialogDescription className="flex w-full flex-col gap-3">
                           <Button onClick={() => handleRemoveTeam(team._id, 1)}>
-                            Delete Team and task assigned to team members
+                            Delete Team and delete task assigned to team members
                           </Button>
                           <Button onClick={() => handleRemoveTeam(team._id, 2)}>
                             Delete Team and remove the assignee's of those task

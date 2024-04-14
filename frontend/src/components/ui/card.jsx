@@ -90,22 +90,24 @@ const Card = (props) => {
                 <HoverCard>
                   <HoverCardTrigger>
                     <div className="rounded-full bg-slate-200 border-1 size-6 flex items-center justify-center font-medium mr-2 cursor-default">
-                      {assignee?.email[0].toUpperCase()}
+                      {assignee.email && assignee?.email[0].toUpperCase()}
                     </div>
                   </HoverCardTrigger>
                   <HoverCardContent className="p-1">
                     <div className="flex justify-between">
                       <div>
                         <span className="text-sm block font-semibold">
-                          {assignee?.name}
+                          {assignee.email && assignee?.name}
                         </span>
-                        <span className="text-sm">{assignee?.email}</span>
+                        <span className="text-sm">
+                          {assignee.email && assignee?.email}
+                        </span>
                       </div>
                       <div>
                         <Avatar>
                           <AvatarImage src="https://github.com/shadcn.pdng" />
                           <AvatarFallback className="bg-red-100 cursor-default">
-                            {assignee?.email[0].toUpperCase()}
+                            {assignee.email && assignee?.email[0].toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                       </div>
