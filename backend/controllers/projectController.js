@@ -54,6 +54,26 @@ const updateProject = async (req, res) => {
   }
 };
 
+const addNewTeam = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { teamId } = req.body;
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
+    if (project.teams.includes(teamId)) {
+      return res.status(400).json({ msg: "Team already exists in project" });
+    }
+
+    await Project.findByIdAndUpdate(id, { $addToSet: { teams: teamId } });
+    return res.status(200).json({ msg: "Team added to project" });
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+};
+
 const createProjectTask = async (req, res) => {
   try {
     const id = req.query.id;
@@ -159,8 +179,29 @@ const updateProjectTask = async (req, res) => {
   }
 };
 
+const deleteProjectTeam = async (req, res) => {
+  try {
+    const id = req.params.pid;
+    const teamId = req.params.tid;
+    const project = await Project.findById(id);
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
+    if (!project.teams.includes(teamId)) {
+      return res.status(400).json({ msg: "Team not found in project" });
+    }
+
+    // await Project.findByIdAndUpdate(id, { $pull: { teams: teamId } });
+    return res.status(200).json({ msg: "Team removed from project" });
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+};
+
 exports.createProject = createProject;
 exports.getProject = getProject;
 exports.updateProject = updateProject;
 exports.createProjectTask = createProjectTask;
 exports.updateProjectTask = updateProjectTask;
+exports.addNewTeam = addNewTeam;
+exports.deleteProjectTeam = deleteProjectTeam;

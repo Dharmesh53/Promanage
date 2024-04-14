@@ -30,6 +30,7 @@ import { Input } from "./input";
 import { Label } from "./label";
 import { useSelector } from "react-redux";
 import { useToast } from "./use-toast";
+import { useEffect } from "react";
 
 const AddCard = ({ column, setCards, userBoard }) => {
   const [text, setText] = useState("");
@@ -37,16 +38,33 @@ const AddCard = ({ column, setCards, userBoard }) => {
   const [priority, setPriority] = useState("");
   const [assignee, setAssignee] = useState("");
   const [clicked, setClicked] = useState(false);
+  const [assigneList, setAssigneeList] = useState([]);
   const { toast } = useToast();
 
-  const assigneList = useSelector(
-    (state) => state.project?.project?.project?.teams[0]?.users
-  );
+  const teams = useSelector((state) => state.project?.project?.project?.teams);
   const user = useSelector((state) => state.auth.user);
+
   let id = "";
   if (!userBoard) {
     id = useSelector((state) => state.project?.project?.project?._id);
   }
+
+  useEffect(() => {
+    let nestedList = teams?.map((team) =>
+      team.users.map((user) => {
+        return {
+          name: user.name,
+          email: user.email,
+        };
+      })
+    );
+    //wowowwowowowwww....
+    setAssigneeList(
+      [...new Set(nestedList?.flat().map((obj) => JSON.stringify(obj)))].map(
+        (str) => JSON.parse(str)
+      )
+    );
+  }, [teams]);
 
   const handleSubmit = async (e) => {
     try {
@@ -126,11 +144,13 @@ const AddCard = ({ column, setCards, userBoard }) => {
                     <SelectValue placeholder="Select assignee for task" />
                   </SelectTrigger>
                   <SelectContent className="font-pops">
-                    {assigneList?.map((al, i) => (
-                      <SelectItem key={i} value={al.email}>
-                        {al.email}
-                      </SelectItem>
-                    ))}
+                    {assigneList?.map((al, i) => {
+                      return (
+                        <SelectItem key={i} value={al.email}>
+                          {al.email}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </>

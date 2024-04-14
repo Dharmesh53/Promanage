@@ -1,18 +1,20 @@
-import { IoIosArrowDown } from "react-icons/io";
+import { CgRemoveR } from "react-icons/cg";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { FaCheck } from "react-icons/fa6";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/use-toast";
+import { Separator } from "@/components/ui/separator";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -20,18 +22,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useEffect } from "react";
 
 const ProjectDetails = () => {
+  const { toast } = useToast();
+
   const project = useSelector((state) => state.project?.project?.project);
+  const teams = useSelector((state) => state.auth?.user?.teams);
+
   const [title, setTitle] = useState(project?.title);
   const [description, setDescription] = useState(project?.description);
   const [progess, setprogess] = useState(project?.progess);
+  const [newTeam, setNewTeam] = useState("Select new team");
   const [totalMembers, setTotalMembers] = useState(0);
-
-  const colors = ["#d3869b", "#8ec07c", "#83a595", "#fabd2f", "#b8bb26"];
 
   useEffect(() => {
     let membersCount = 0;
@@ -46,7 +62,6 @@ const ProjectDetails = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    console.log(title, description, progess);
     await axios.put(
       `http://localhost:5000/api/project/updateProject/${project._id}`,
       {
@@ -55,6 +70,49 @@ const ProjectDetails = () => {
         progess,
       }
     );
+  };
+
+  const handleAddTeam = async () => {
+    if (newTeam === "Select new team") {
+      toast({
+        variant: "destructive",
+        className: "bg-red-400 p-2",
+        title: "Please select a team",
+      });
+      return;
+    }
+    let teamId = null;
+    teams.forEach((team) => {
+      if (team.title === newTeam) {
+        teamId = team._id;
+      }
+    });
+    try {
+      await axios.post(
+        `http://localhost:5000/api/project/addTeam/${project._id}`,
+        { teamId }
+      );
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        className: "bg-red-400 p-2",
+        title: error.response.data.msg,
+      });
+    }
+  };
+
+  const handleRemoveTeam = async (teamId, code) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
+      );
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        className: "bg-red-400 p-2",
+        title: error.response.data.msg || "error",
+      });
+    }
   };
 
   return (
@@ -78,15 +136,13 @@ const ProjectDetails = () => {
         <div className="flex">
           {project?.teams.map((team) =>
             team.users.slice(0, 4).map((user, i) => {
-              const randomColor =
-                colors[Math.floor(Math.random() * colors.length)];
               return (
                 <Avatar
                   className={`border-4 border-white z-[50] -ml-3 `}
                   key={i}
                 >
                   <AvatarImage src="\" />
-                  <AvatarFallback style={{ backgroundColor: randomColor }}>
+                  <AvatarFallback className="bg-[#94dbba]">
                     {user.email.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -94,14 +150,9 @@ const ProjectDetails = () => {
             })
           )}
           {totalMembers - 4 > 0 && (
-            <Avatar className="border border-black z-0 -ml-3 ">
+            <Avatar className="border-4 border-white z-0 -ml-3 ">
               <AvatarImage src="\" />
-              <AvatarFallback
-                style={{
-                  backgroundColor:
-                    colors[Math.floor(Math.random() * colors.length)],
-                }}
-              >
+              <AvatarFallback className="bg-[#94dbba]">
                 +{totalMembers - 4}
               </AvatarFallback>
             </Avatar>
@@ -153,16 +204,54 @@ const ProjectDetails = () => {
           </Button>
         </div>
         <div className="border rounded-lg border-neutral-400 border-dashed p-4">
-          <div className="flex justify-between items-center mb-4">
-            <span className="font-medium">Teams</span>
-            <Button variant="secondary">Add Teams</Button>
+          <span className="font-medium">Add new teams</span>
+          <div className="flex gap-3 mb-4">
+            <Select value={newTeam} onValueChange={setNewTeam}>
+              <SelectTrigger>
+                <SelectValue>{newTeam}</SelectValue>
+              </SelectTrigger>
+              <SelectContent className="font-pops">
+                {teams?.map((team, i) => (
+                  <SelectItem value={team.title} key={i}>
+                    {team.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button className="p-2" onClick={handleAddTeam}>
+              <FaCheck size={17} />
+            </Button>
           </div>
           {project?.teams.map((team, idx) => (
             <Collapsible key={idx}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full">
-                <span className="text-xl">{team.title}</span>
+              <CollapsibleTrigger className="flex items-center justify-between w-full my-1">
+                <span className="text-lg">{team.title}</span>
                 <span>
-                  <IoIosArrowDown />
+                  <AlertDialog>
+                    <AlertDialogTrigger>
+                      <Button className="text-red-400" variant="link">
+                        <CgRemoveR />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="flex w-full flex-col gap-3">
+                          <Button onClick={() => handleRemoveTeam(team._id, 1)}>
+                            Delete Team and task assigned to team members
+                          </Button>
+                          <Button onClick={() => handleRemoveTeam(team._id, 2)}>
+                            Delete Team and remove the assignee's of those task
+                          </Button>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </span>
               </CollapsibleTrigger>
               <Separator />
@@ -171,6 +260,8 @@ const ProjectDetails = () => {
                   {team?.users.map((user, i) => (
                     <motion.div
                       key={i}
+                      layout
+                      layoutId={i}
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2, delay: i * 0.15 }}
