@@ -1,9 +1,9 @@
 const Team = require("../models/team");
 const User = require("../models/user");
 
-const addMembers = async (req, res) => {
+const createTeam = async (req, res) => {
   try {
-    const { title, members } = req.body;
+    const { title, members, createdBy } = req.body;
     const memberIds = [];
     for (const member of members) {
       const user = await User.findOne({ email: member });
@@ -14,6 +14,7 @@ const addMembers = async (req, res) => {
     const team = new Team({
       title: title,
       users: memberIds,
+      createdBy,
     });
     await team.save();
     for (const id of memberIds) {
@@ -24,8 +25,8 @@ const addMembers = async (req, res) => {
     return res.status(200).json({ msg: "done" });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: err.message });
   }
 };
 
-exports.addMembers = addMembers;
+exports.createTeam = createTeam;

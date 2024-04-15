@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Teamform = ({ user }) => {
   const { toast } = useToast();
@@ -48,6 +49,7 @@ const Teamform = ({ user }) => {
       await axios.post("http://localhost:5000/api/team/create", {
         title: title,
         members,
+        createdBy: user.email,
       });
       toast({
         title: "Done !!",

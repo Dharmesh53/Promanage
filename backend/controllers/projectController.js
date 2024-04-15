@@ -9,10 +9,11 @@ const Cache = require("../utils/Cache");
 const createProject = async (req, res) => {
   try {
     const id = req.id;
-    const { title, teamId } = req.body;
+    const { title, teamId, createdBy } = req.body;
     const project = new Project({
       title,
       teams: [teamId],
+      createdBy,
     });
     await project.save();
     await User.findByIdAndUpdate(id, { $push: { projects: project._id } });

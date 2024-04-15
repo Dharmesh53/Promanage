@@ -18,11 +18,13 @@ import { Label } from "./ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Projectform = ({ teams }) => {
   const { toast } = useToast();
   const [title, setTitle] = useState(null);
   const [value, setValue] = useState(null);
+  const user = useSelector((state) => state.auth?.user);
 
   const handleSubmit = async () => {
     try {
@@ -37,6 +39,7 @@ const Projectform = ({ teams }) => {
         {
           title,
           teamId,
+          createdBy: user.email,
         }
       );
       if (result.status == 200) {

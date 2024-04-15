@@ -12,6 +12,7 @@ const projectSchema = new Schema({
   tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
   teams: [{ type: Schema.Types.ObjectId, ref: "Team" }],
   files: [String],
+  createdBy: { type: String, required: true },
 });
 
 module.exports = model("Project", projectSchema);

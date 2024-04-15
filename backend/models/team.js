@@ -9,6 +9,10 @@ const teamSchema = new Schema({
     unique: true,
   },
   users: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  createdBy: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = model("Team", teamSchema);
