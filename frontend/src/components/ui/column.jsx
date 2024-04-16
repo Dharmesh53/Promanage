@@ -2,6 +2,7 @@ import { useState } from "react";
 import Card from "./card";
 import AddCard from "./addCard";
 import { DropIndicator } from "./card";
+import { useSelector } from "react-redux";
 
 const Column = ({
   title,
@@ -13,6 +14,8 @@ const Column = ({
   userBoard,
 }) => {
   const [active, setActive] = useState(false);
+  const project = useSelector((state) => state.project?.project?.project);
+  const user = useSelector((state) => state.auth?.user);
 
   const handleDragStart = (e, card) => {
     e.dataTransfer.setData("cardId", card._id);
@@ -141,7 +144,9 @@ const Column = ({
           );
         })}
         <DropIndicator beforeId={null} column={column} />
-        <AddCard column={column} setCards={setCards} userBoard={userBoard} />
+        {user.email === project.createdBy && (
+          <AddCard column={column} setCards={setCards} userBoard={userBoard} />
+        )}
       </div>
     </div>
   );

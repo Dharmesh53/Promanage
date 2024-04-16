@@ -16,7 +16,12 @@ const createProject = async (req, res) => {
       createdBy,
     });
     await project.save();
-    await User.findByIdAndUpdate(id, { $push: { projects: project._id } });
+    const team = await Team.findById(teamId);
+
+    team?.users.forEach(async (user) => {
+      await User.findByIdAndUpdate(user, { $push: { projects: project._id } });
+    });
+
     return res.status(200).json({ msg: "done" });
   } catch (error) {
     return res.status(500).json({ msg: error.message });

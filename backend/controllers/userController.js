@@ -86,7 +86,11 @@ const getUserTeams = async (req, res, next) => {
     for (const teamID of users.teams) {
       const team = await Team.findById(teamID);
       if (team) {
-        teamNames.push({ id: teamID, title: team.title });
+        teamNames.push({
+          id: teamID,
+          title: team.title,
+          createdBy: team.createdBy,
+        });
       }
     }
     return res.status(200).json({ names: teamNames });

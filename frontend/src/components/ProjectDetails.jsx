@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -42,7 +41,7 @@ const ProjectDetails = () => {
 
   const project = useSelector((state) => state.project?.project?.project);
   const teams = useSelector((state) => state.auth?.user?.teams);
-
+  const user = useSelector((state) => state.auth?.user);
   const [title, setTitle] = useState(project?.title);
   const [description, setDescription] = useState(project?.description);
   const [progess, setprogess] = useState(project?.progess);
@@ -120,17 +119,19 @@ const ProjectDetails = () => {
       <div className="flex justify-between">
         <div>
           <span className="font-semibold text-2xl">{project?.title}</span>
-          <span
-            className={`text-sm ml-2  border rounded-full px-2 ${
-              progess === "At risk"
-                ? "bg-orange-200 border-orange-600"
-                : progess === "Off track"
-                ? "bg-yellow-200 border-yellow-600"
-                : "bg-teal-200 border-teal-600"
-            } `}
-          >
-            {project?.progess}
-          </span>
+          {progess && (
+            <span
+              className={`text-sm ml-2  border rounded-full px-2 ${
+                progess === "At risk"
+                  ? "bg-orange-200 border-orange-600"
+                  : progess === "Off track"
+                  ? "bg-yellow-200 border-yellow-600"
+                  : "bg-teal-200 border-teal-600"
+              } `}
+            >
+              {project?.progess}
+            </span>
+          )}
           <p className="text-sm"> {project?.tasks.length} Tasks</p>
         </div>
         <div className="flex">
@@ -170,6 +171,7 @@ const ProjectDetails = () => {
                 name="title"
                 className="mb-2 "
                 value={title}
+                disabled={user?.email !== project.createdBy}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
@@ -177,7 +179,11 @@ const ProjectDetails = () => {
               <Label htmlFor="status" className="text-md ">
                 Progress
               </Label>
-              <Select value={progess} onValueChange={setprogess}>
+              <Select
+                value={progess}
+                onValueChange={setprogess}
+                disabled={user?.email !== project.createdBy}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Progress" />
                 </SelectTrigger>
@@ -194,65 +200,82 @@ const ProjectDetails = () => {
           </Label>
           <Textarea
             name="description"
-            className="h-[30rem]"
+            className="h-[30rem] "
             value={description}
+            disabled={user?.email !== project.createdBy}
             placeholder="Describe your project"
             onChange={(e) => setDescription(e.target.value)}
           />
-          <Button className="w-1/4 mx-auto my-4" onClick={handleUpdate}>
-            Update
-          </Button>
+          {user?.email === project.createdBy && (
+            <Button className="w-1/4 mx-auto my-4" onClick={handleUpdate}>
+              Update
+            </Button>
+          )}
         </div>
         <div className="border rounded-lg border-neutral-400 border-dashed p-4">
-          <span className="font-medium">Add new teams</span>
-          <div className="flex gap-3 mb-4">
-            <Select value={newTeam} onValueChange={setNewTeam}>
-              <SelectTrigger>
-                <SelectValue>{newTeam}</SelectValue>
-              </SelectTrigger>
-              <SelectContent className="font-pops">
-                {teams?.map((team, i) => (
-                  <SelectItem value={team.title} key={i}>
-                    {team.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button className="p-2" onClick={handleAddTeam}>
-              <FaCheck size={17} />
-            </Button>
-          </div>
+          {user?.email === project.createdBy ? (
+            <>
+              <span className="font-medium">Add new teams</span>
+              <div className="flex gap-3 mb-4">
+                <Select value={newTeam} onValueChange={setNewTeam}>
+                  <SelectTrigger>
+                    <SelectValue>{newTeam}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="font-pops">
+                    {teams?.map((team, i) => (
+                      <SelectItem value={team.title} key={i}>
+                        {team.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button className="p-2" onClick={handleAddTeam}>
+                  <FaCheck size={17} />
+                </Button>
+              </div>
+            </>
+          ) : (
+            <span className="font-medium">Teams</span>
+          )}
           {project?.teams.map((team, idx) => (
             <Collapsible key={idx}>
               <CollapsibleTrigger className="flex items-center justify-between w-full my-1">
                 <span className="text-lg">{team.title}</span>
-                <span>
-                  <AlertDialog>
-                    <AlertDialogTrigger>
-                      <Button className="text-red-400" variant="link">
-                        <CgRemoveR />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="flex w-full flex-col gap-3">
-                          <Button onClick={() => handleRemoveTeam(team._id, 1)}>
-                            Delete Team and delete task assigned to team members
-                          </Button>
-                          <Button onClick={() => handleRemoveTeam(team._id, 2)}>
-                            Delete Team and remove the assignee's of those task
-                          </Button>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </span>
+                {user?.email === project.createdBy && (
+                  <span>
+                    <AlertDialog>
+                      <AlertDialogTrigger>
+                        <Button className="text-red-400" variant="link">
+                          <CgRemoveR />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="flex w-full flex-col gap-3">
+                            <Button
+                              onClick={() => handleRemoveTeam(team._id, 1)}
+                            >
+                              Delete Team and delete task assigned to team
+                              members
+                            </Button>
+                            <Button
+                              onClick={() => handleRemoveTeam(team._id, 2)}
+                            >
+                              Delete Team and remove the assignee's of those
+                              task
+                            </Button>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </span>
+                )}
               </CollapsibleTrigger>
               <Separator />
               <CollapsibleContent>
