@@ -64,12 +64,23 @@ const projectOfId = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="board">Board</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
+          <TabsTrigger value="draw">Draw</TabsTrigger>
         </TabsList>
         <TabsContent value="board">
           {cards && (
             <>
               <Board cards={cards} setCards={setCards} userBoard={false} />
               <BurnBarrel setCards={setCards} />
+              <Button
+                className={`absolute top-4 right-4`}
+                variant="ghost"
+                onClick={fetcher}
+              >
+                <TbRefresh
+                  size={25}
+                  className={` ${clicked && "animate-spin"}`}
+                />
+              </Button>
             </>
           )}
         </TabsContent>
@@ -77,14 +88,8 @@ const projectOfId = () => {
           <ProjectDetails />
         </TabsContent>
         <TabsContent value="files">your files</TabsContent>
+        <TabsContent value="draw">Drawings</TabsContent>
       </Tabs>
-      <Button
-        className={`absolute top-4 right-4`}
-        variant="ghost"
-        onClick={fetcher}
-      >
-        <TbRefresh size={25} className={` ${clicked && "animate-spin"}`} />
-      </Button>
     </div>
   );
 };

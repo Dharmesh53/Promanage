@@ -144,7 +144,7 @@ const Column = ({
           );
         })}
         <DropIndicator beforeId={null} column={column} />
-        {user.email === project.createdBy && (
+        {user?.email === project?.createdBy && (
           <AddCard column={column} setCards={setCards} userBoard={userBoard} />
         )}
       </div>

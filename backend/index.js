@@ -1,27 +1,34 @@
 require("dotenv").config();
 const express = require("express");
-const cookieParser = require("cookie-parser");
+const http = require("http");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
-
+const { Server } = require("socket.io");
 const connectToDB = require("./utils/connectToDB");
-const userRoutes = require("./routes/userRoutes");
-const projectRoutes = require("./routes/projectRoutes");
-const teamRoutes = require("./routes/teamRoutes");
-const taskRoutes = require("./routes/taskRoutes");
+const configureRoutes = require("./server/express");
+const configureSocket = require("./server/socket");
 
+const port = process.env.PORT || 5000;
 const app = express();
-app.use(morgan("dev"));
+
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(cookieParser());
 app.use(express.json()); //order matter in middlewares
-app.use("/api", userRoutes);
-app.use("/api/project", projectRoutes);
-app.use("/api/team", teamRoutes);
-app.use("/api/task", taskRoutes);
+app.use(morgan(":status :method :url - :response-time ms "));
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+  },
+});
+
+configureRoutes(app);
+configureSocket(io);
 
 connectToDB().then(() => {
-  app.listen(5000, () => {
-    console.log("Listening to 5000");
+  server.listen(5000, () => {
+    console.log(`Server running on port ${port}`);
   });
 });

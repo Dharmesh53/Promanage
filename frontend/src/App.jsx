@@ -11,6 +11,7 @@ import Signup from "./components/Signup";
 import Login from "./components/Login";
 import Projects from "./pages/Projects";
 import UserTasks from "./pages/UserTasks";
+import socket from "./lib/socket";
 
 function App() {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
