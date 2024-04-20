@@ -10,6 +10,7 @@ import { setProject } from "../store/projectSlice";
 import { useToast } from "@/components/ui/use-toast";
 import BurnBarrel from "@/components/ui/burnBarrel";
 import ProjectDetails from "@/components/ProjectDetails";
+import DrawBoard from "@/components/DrawBoard";
 
 const projectOfId = () => {
   const { id } = useParams();
@@ -88,7 +89,9 @@ const projectOfId = () => {
           <ProjectDetails />
         </TabsContent>
         <TabsContent value="files">your files</TabsContent>
-        <TabsContent value="draw">Drawings</TabsContent>
+        <TabsContent value="draw">
+          <DrawBoard />
+        </TabsContent>
       </Tabs>
     </div>
   );

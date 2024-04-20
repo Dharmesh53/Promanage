@@ -7,6 +7,10 @@ body {
   background-image: radial-gradient(circle, #000000 1px, rgba(0, 0, 0, 0) 1px);
 }
 
+a[aria-label="React Flow attribution"] {
+  display: none;
+}
+
 .board {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
@@ -26,4 +30,12 @@ body {
   to {
     transform: rotate(-360deg);
   }
+}
+
+.divtext {
+  border: ridge 2px;
+  padding: 5px;
+  width: 20em;
+  min-height: 5em;
+  overflow: auto;
 }
