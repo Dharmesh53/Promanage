@@ -1,5 +1,7 @@
-import TextUpdaterNode from "@/lib/Nodes/TextBoxUpdaterNode";
-import PlainTextUpdaterNode from "@/lib/Nodes/PlainTextUpdaterNode";
+import TextBoxNode from "@/lib/Nodes/TextBoxNode";
+import PlainTextNode from "@/lib/Nodes/PlainTextNode";
+import ImageNode from "@/lib/Nodes/ImageNode";
+import ShapeNode from "@/lib/Nodes/ShapeNode";
 import React, { useCallback, useState, useMemo } from "react";
 import ReactFlow, {
   MiniMap,
@@ -26,15 +28,35 @@ const initialNodes = [
   { id: "4", position: { x: 671, y: 132 }, data: { label: "4" } },
   {
     id: "node-1",
-    type: "textUpdater",
+    type: "textBox",
     position: { x: 435, y: 786 },
     data: { value: 123 },
   },
   {
     id: "node-2",
-    type: "plaintextUpdater",
+    type: "plaintext",
     position: { x: 198, y: 57 },
     data: { value: 54 },
+  },
+  {
+    id: "node-3",
+    type: "image",
+    position: { x: 645, y: 459 },
+    data: { value: 54 },
+  },
+  {
+    id: "node-4",
+    type: "shape",
+    position: { x: 573, y: 213 },
+    data: { value: 54, shape: "square" },
+    zIndex: -9999,
+  },
+  {
+    id: "node-5",
+    type: "shape",
+    position: { x: 322, y: 213 },
+    data: { value: 54, shape: "circle" },
+    zIndex: -9999,
   },
   { id: "5", position: { x: 456, y: 733 }, data: { label: "5" } },
   { id: "6", position: { x: 678, y: 293 }, data: { label: "6" } },
@@ -60,8 +82,10 @@ export default function DrawBoard() {
 
   const nodeTypes = useMemo(
     () => ({
-      textUpdater: TextUpdaterNode,
-      plaintextUpdater: PlainTextUpdaterNode,
+      textBox: TextBoxNode,
+      plaintext: PlainTextNode,
+      image: ImageNode,
+      shape: ShapeNode,
     }),
     []
   );

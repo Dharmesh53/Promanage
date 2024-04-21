@@ -50,6 +50,9 @@ dependencies:
   '@radix-ui/react-toast':
     specifier: ^1.1.5
     version: 1.1.5(@types/react-dom@18.2.22)(@types/react@18.2.70)(react-dom@18.2.0)(react@18.2.0)
+  '@reactflow/node-resizer':
+    specifier: ^2.2.11
+    version: 2.2.11(@types/react@18.2.70)(react-dom@18.2.0)(react@18.2.0)
   '@reduxjs/toolkit':
     specifier: ^2.2.2
     version: 2.2.2(react-redux@9.1.0)(react@18.2.0)

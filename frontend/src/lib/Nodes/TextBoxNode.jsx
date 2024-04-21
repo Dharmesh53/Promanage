@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useCallback } from "react";
 import { Handle, Position } from "reactflow";
 
-export default function TextUpdaterNode({ data }) {
+export default function TextBoxNode({ data }) {
   const textareaRef = useRef(null);
   const onChange = useCallback((evt) => {
     console.log(evt.target.value);
