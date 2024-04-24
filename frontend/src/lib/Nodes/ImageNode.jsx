@@ -1,32 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { NodeResizer } from "reactflow";
 
 const ImageNode = ({ data, selected }) => {
-  const [imageSrc, setImageSrc] = useState(null);
   const [imageWidth, setImageWidth] = useState("auto");
   const [imageHeight, setImageHeight] = useState("auto");
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = () => {
-        setImageSrc(reader.result);
-      };
-    }
-  };
-
   return (
     <>
-      <input
-        type="file"
-        name=""
-        id=""
-        accept="image/*"
-        onChange={handleFileChange}
-      />
       <NodeResizer
         isVisible={selected}
         color="#d6921e"
@@ -37,9 +17,9 @@ const ImageNode = ({ data, selected }) => {
           setImageHeight(height);
         }}
       />
-      {imageSrc && (
+      {data?.imageSrc && (
         <img
-          src={imageSrc}
+          src={data?.imageSrc}
           alt="img"
           className="rounded-lg "
           style={{ width: imageWidth, height: imageHeight }}
