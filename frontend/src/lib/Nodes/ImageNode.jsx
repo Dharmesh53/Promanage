@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { NodeResizer } from "reactflow";
 
-const ImageNode = ({ data, selected }) => {
-  const [imageWidth, setImageWidth] = useState("auto");
-  const [imageHeight, setImageHeight] = useState("auto");
+const ImageNode = ({ data, selected, width, height }) => {
+  const [imageWidth, setImageWidth] = useState(width || "auto");
+  const [imageHeight, setImageHeight] = useState(height || "auto ");
 
   return (
     <>
@@ -12,6 +12,7 @@ const ImageNode = ({ data, selected }) => {
         color="#d6921e"
         minWidth={100}
         minHeight={100}
+        keepAspectRatio="true"
         onResize={(width, height) => {
           setImageWidth(width);
           setImageHeight(height);

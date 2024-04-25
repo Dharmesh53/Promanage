@@ -75,6 +75,7 @@ module.exports = {
     },
     fontFamily: {
       pops: ["Poppins", "sans"],
+      chilanka: ["Chilanka", "sans"],
     },
   },
   plugins: [require("tailwindcss-animate")],

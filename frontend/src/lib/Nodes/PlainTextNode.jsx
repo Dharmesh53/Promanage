@@ -1,7 +1,23 @@
 import { Label } from "@/components/ui/label";
 import { useRef, useState } from "react";
+import { MdTextIncrease } from "react-icons/md";
+import { TbCopy } from "react-icons/tb";
+import { MdTextDecrease } from "react-icons/md";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
 export default function PlainTextNode({ data }) {
+  const Fonts = [
+    "text-xs",
+    "text-sm",
+    "text-md",
+    "text-lg",
+    "text-xl",
+    "text-2xl",
+    "text-3xl",
+  ];
   const [text, setText] = useState(data.value);
+  const [fontSize, setFontSize] = useState(0);
+  const [popover, setPopover] = useState(false);
   const InputRef = useRef(null);
 
   const handleChangeText = () => {
@@ -14,30 +30,68 @@ export default function PlainTextNode({ data }) {
     if (element) {
       element.style.height = "auto";
       element.style.height = `${element.scrollHeight}px`;
-
       element.style.width = "auto";
       element.style.width = `${element.scrollWidth}px`;
     }
   }
 
+  useEffect(adjustHeight, [fontSize]);
+
   return (
     <>
       <div
         className={`${
-          InputRef?.current?.value.trim() === "Enter Text" ? "border" : ""
-        } max-h-[80rem] p-1`}
+          InputRef?.current?.value.trim() ? "border" : "border"
+        } max-h-[80rem]  rounded`}
       >
-        <Label htmlFor="text">
-          <input
-            ref={InputRef}
-            id="text"
-            name="text"
-            value={text}
-            onChange={handleChangeText}
-            onInput={adjustHeight}
-            className={`border-none outline-none w-36 focus-visible:ring-0 font-normal bg-transparent overflow-auto text-center text-xs resize-none`}
-          />
-        </Label>
+        <input
+          ref={InputRef}
+          id="text"
+          name="text"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setPopover((prev) => !prev);
+          }}
+          value={text}
+          placeholder="Enter Text"
+          onChange={handleChangeText}
+          onInput={adjustHeight}
+          className={`border-none font-chilanka outline-none w-36 focus-visible:ring-0 font-normal bg-transparent overflow-auto text-center resize-none ${Fonts[fontSize]}`}
+        />
+        <AnimatePresence>
+          {popover && (
+            <motion.div
+              className="absolute top-[-80%] right-0 flex bg-white border rounded"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 5 }}
+            >
+              <button
+                className="hover:bg-slate-200 gap-2 p-1"
+                onClick={() => {
+                  setFontSize((prev) => Math.min(prev + 1, 6));
+                  console.log(InputRef.current.classList);
+                }}
+              >
+                <MdTextIncrease size={16} />
+              </button>
+              <button
+                className="hover:bg-slate-200 gap-2 p-1"
+                onClick={() => setFontSize((prev) => Math.max(prev - 1, 0))}
+              >
+                <MdTextDecrease size={16} />
+              </button>
+              <button
+                className=" gap-2 p-1 hover:bg-slate-200"
+                onClick={() =>
+                  navigator.clipboard.writeText(InputRef.current.value)
+                }
+              >
+                <TbCopy size={16} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

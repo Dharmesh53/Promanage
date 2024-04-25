@@ -13,7 +13,7 @@ export const createSquare = (divRef) => {
     type: "shape",
     position: getCoords(divRef),
     data: { shape: "square" },
-    zIndex: 999,
+    zIndex: 200,
   };
 };
 
@@ -23,7 +23,7 @@ export const createCircle = (divRef) => {
     type: "shape",
     position: getCoords(divRef),
     data: { shape: "circle" },
-    zIndex: 999,
+    zIndex: 200,
   };
 };
 
@@ -33,7 +33,7 @@ export const createPlainText = (divRef) => {
     type: "plaintext",
     position: getCoords(divRef),
     data: { value: "" },
-    zIndex: 999,
+    zIndex: 400,
   };
 };
 
@@ -43,7 +43,7 @@ export const createTextBox = (divRef) => {
     type: "textBox",
     position: getCoords(divRef),
     data: { value: "" },
-    zIndex: 999,
+    zIndex: 400,
   };
 };
 
@@ -60,7 +60,7 @@ export const insertImage = (divRef, imageRef) => {
           type: "image",
           position: getCoords(divRef),
           data: { imageSrc: image },
-          zIndex: 999,
+          zIndex: 300,
         };
         resolve(imageNode);
       };
