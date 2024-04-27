@@ -12,9 +12,9 @@ const verifyToken = require("../utils/verifyToken");
 
 const router = express.Router();
 
-router.get("/:id", getProject);
+router.get("/:id", verifyToken, getProject);
 
-router.post("/create", verifyToken, createProject);
+router.post("/create", createProject);
 router.post("/createTask", createProjectTask);
 router.post("/addTeam/:id", addNewTeam);
 

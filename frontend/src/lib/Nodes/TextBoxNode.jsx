@@ -71,8 +71,8 @@ export default function TextBoxNode({ data, selected }) {
           onContextMenu={handleContextMenu}
           // onInput={adjustHeight}
           onChange={onChange}
-          spellcheck="false"
-          className={`outline-none min-h-10 border rounded-lg relative border-black max-h-[80rem] font-chilanka w-36 focus-visible:ring-0 p-1 font-normal overflow-auto  text-center ${Fonts[fontSize]} `}
+          spellCheck="false"
+          className={`outline-none resize-none min-h-10 border rounded-lg relative border-black max-h-[80rem] font-chilanka w-36 focus-visible:ring-0 p-1 font-normal overflow-auto  text-center ${Fonts[fontSize]} `}
           style={{
             width: `${width}px`,
             height: `${height}px`,

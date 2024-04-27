@@ -8,7 +8,6 @@ const Cache = require("../utils/Cache");
 
 const createProject = async (req, res) => {
   try {
-    const id = req.id;
     const { title, teamId, createdBy } = req.body;
     const project = new Project({
       title,
@@ -22,7 +21,7 @@ const createProject = async (req, res) => {
       await User.findByIdAndUpdate(user, { $push: { projects: project._id } });
     });
 
-    return res.status(200).json({ msg: "done" });
+    return res.status(201).json({ msg: "done" });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
@@ -30,6 +29,7 @@ const createProject = async (req, res) => {
 
 const getProject = async (req, res) => {
   try {
+    const userEmail = req.email;
     const id = req.params.id;
     const project = await Project.findById(id)
       .populate({
@@ -39,6 +39,13 @@ const getProject = async (req, res) => {
         },
       })
       .populate("tasks");
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
+    if (project.createdBy !== userEmail) {
+      console.log(project.createdBy, userEmail);
+      return res.status(400).json({ msg: "You sneaky little bastard" });
+    }
     return res.status(200).json({ project: project });
   } catch (error) {
     return res.status(500).json({ msg: error.message });

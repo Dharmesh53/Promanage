@@ -70,7 +70,7 @@ const Navbar = ({ user }) => {
                   <DialogTrigger>
                     <FaPlus size={12} className="mx-2" onClick={handleTeams} />
                   </DialogTrigger>
-                  <ProjectForm teams={teams} />
+                  {teams && <ProjectForm teams={teams} />}
                 </Dialog>
               </span>
             </Link>

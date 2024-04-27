@@ -1,9 +1,13 @@
 const jwt = require("jsonwebtoken");
 
 const genTokenAndSetCookie = (user, res) => {
-  const token = jwt.sign({ user: user._id }, process.env.JWT_SECERT, {
-    expiresIn: "15d",
-  });
+  const token = jwt.sign(
+    { user: user._id, email: user.email },
+    process.env.JWT_SECERT,
+    {
+      expiresIn: "15d",
+    }
+  );
 
   res.cookie(String(user._id), token, {
     path: "/",

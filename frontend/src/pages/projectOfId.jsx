@@ -38,6 +38,7 @@ const projectOfId = () => {
           toast({
             title: "Successfully updated",
             description: "Your board is saved",
+            className: "p-2",
           });
         }
       });

@@ -24,14 +24,14 @@ const Projectform = ({ teams }) => {
   const { toast } = useToast();
   const [value, setValue] = useState(null);
   const [title, setTitle] = useState("");
-  const [filteredTeam, setFilteredTeam] = useState();
+  const [filteredTeam, setFilteredTeam] = useState([]);
   const user = useSelector((state) => state.auth?.user);
 
   useEffect(() => {
     setFilteredTeam(
       teams?.names?.filter((team) => team.createdBy === user.email)
     );
-  }, []);
+  }, [teams, user?.email]);
 
   const handleSubmit = async () => {
     try {

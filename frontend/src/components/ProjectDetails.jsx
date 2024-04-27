@@ -119,7 +119,7 @@ const ProjectDetails = () => {
       <div className="flex justify-between">
         <div>
           <span className="font-semibold text-2xl">{project?.title}</span>
-          {progess && (
+          {progess?.progess != undefined && (
             <span
               className={`text-sm ml-2  border rounded-full px-2 ${
                 progess === "At risk"
@@ -171,7 +171,7 @@ const ProjectDetails = () => {
                 name="title"
                 className="mb-2 "
                 value={title}
-                disabled={user?.email !== project.createdBy}
+                disabled={user?.email !== project?.createdBy}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
