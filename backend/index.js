@@ -28,7 +28,7 @@ configureRoutes(app);
 configureSocket(io);
 
 connectToDB().then(() => {
-  server.listen(5000, () => {
+  server.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
 });

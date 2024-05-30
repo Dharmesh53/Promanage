@@ -91,7 +91,7 @@ const projectOfId = () => {
         </TabsContent>
         <TabsContent value="files">your files</TabsContent>
         <TabsContent value="draw">
-          <DrawBoard />
+          <DrawBoard className="w-full h-[88vh]"/>
         </TabsContent>
       </Tabs>
     </div>

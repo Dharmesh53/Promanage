@@ -42,10 +42,10 @@ const getProject = async (req, res) => {
     if (!project) {
       return res.status(404).json({ msg: "Project not found" });
     }
-    if (project.createdBy !== userEmail) {
-      console.log(project.createdBy, userEmail);
-      return res.status(400).json({ msg: "You sneaky little bastard" });
-    }
+    //if (project.createdBy !== userEmail) {
+    //  console.log(project.createdBy, userEmail);
+    //  return res.status(400).json({ msg: "You sneaky little bastard" });
+    //}
     return res.status(200).json({ project: project });
   } catch (error) {
     return res.status(500).json({ msg: error.message });

@@ -1,11 +1,14 @@
-import { Label } from "@/components/ui/label";
 import { useRef, useState } from "react";
 import { MdTextIncrease } from "react-icons/md";
 import { TbCopy } from "react-icons/tb";
 import { MdTextDecrease } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
-export default function PlainTextNode({ data }) {
+import { MdDeleteOutline } from "react-icons/md";
+import { useSelector } from "react-redux";
+import socket from "@/lib/socket";
+
+export default function PlainTextNode(props) {
   const Fonts = [
     "text-xs",
     "text-sm",
@@ -15,13 +18,14 @@ export default function PlainTextNode({ data }) {
     "text-2xl",
     "text-3xl",
   ];
-  const [text, setText] = useState(data.value);
+  const [text, setText] = useState(props.data.value);
   const [fontSize, setFontSize] = useState(0);
   const [popover, setPopover] = useState(false);
   const InputRef = useRef(null);
+  const projectId = useSelector((state) => state.project?.project?.project._id);
 
   const handleChangeText = () => {
-    data.value = InputRef.current.value;
+    props.data.value = InputRef.current.value;
     setText(InputRef.current.value);
   };
 
@@ -37,11 +41,17 @@ export default function PlainTextNode({ data }) {
 
   useEffect(adjustHeight, [fontSize]);
 
+  const handleDelete = () => {
+    socket.emit("deleteNode", props.id, projectId, (response) => {
+      console.log(response);
+    });
+    props.setNodes((nodes) => nodes.filter(node => node.id !== props.id));
+  };
   return (
     <>
       <div
         className={`${
-          InputRef?.current?.value.trim() ? "border" : "border"
+          InputRef?.current?.value.trim() ? "" : "border"
         } max-h-[80rem]  rounded`}
       >
         <input
@@ -87,7 +97,13 @@ export default function PlainTextNode({ data }) {
                   navigator.clipboard.writeText(InputRef.current.value)
                 }
               >
-                <TbCopy size={16} />
+                <TbCopy size={14} />
+              </button>
+              <button
+                className="hover:bg-slate-200 gap-2 p-1"
+                onClick={handleDelete} 
+              >
+                <MdDeleteOutline size={16}/>
               </button>
             </motion.div>
           )}

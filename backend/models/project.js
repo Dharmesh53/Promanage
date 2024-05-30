@@ -12,6 +12,8 @@ const projectSchema = new Schema({
   tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
   teams: [{ type: Schema.Types.ObjectId, ref: "Team" }],
   files: [String],
+  roomNodes: Array,
+  roomEdges: Array,
   createdBy: { type: String, required: true },
 });
 

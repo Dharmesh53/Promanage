@@ -182,7 +182,7 @@ const ProjectDetails = () => {
               <Select
                 value={progess}
                 onValueChange={setprogess}
-                disabled={user?.email !== project.createdBy}
+                disabled={user?.email !== project?.createdBy}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Progress" />
@@ -202,18 +202,18 @@ const ProjectDetails = () => {
             name="description"
             className="h-[30rem] "
             value={description}
-            disabled={user?.email !== project.createdBy}
+            disabled={user?.email !== project?.createdBy}
             placeholder="Describe your project"
             onChange={(e) => setDescription(e.target.value)}
           />
-          {user?.email === project.createdBy && (
+          {user?.email === project?.createdBy && (
             <Button className="w-1/4 mx-auto my-4" onClick={handleUpdate}>
               Update
             </Button>
           )}
         </div>
         <div className="border rounded-lg border-neutral-400 border-dashed p-4">
-          {user?.email === project.createdBy ? (
+          {user?.email === project?.createdBy ? (
             <>
               <span className="font-medium">Add new teams</span>
               <div className="flex gap-3 mb-4">
@@ -241,7 +241,7 @@ const ProjectDetails = () => {
             <Collapsible key={idx}>
               <CollapsibleTrigger className="flex items-center justify-between w-full my-1">
                 <span className="text-lg">{team.title}</span>
-                {user?.email === project.createdBy && (
+                {user?.email === project?.createdBy && (
                   <span>
                     <AlertDialog>
                       <AlertDialogTrigger>

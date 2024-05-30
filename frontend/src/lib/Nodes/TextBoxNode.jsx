@@ -9,9 +9,11 @@ import { MdTextDecrease } from "react-icons/md";
 import { Handle, Position } from "reactflow";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { MdDeleteOutline } from "react-icons/md";
+import { useSelector } from "react-redux";
+import socket from "@/lib/socket";
 
-export default function TextBoxNode({ data, selected }) {
+export default function TextBoxNode(props) {
   const Fonts = [
     "text-xs",
     "text-sm",
@@ -26,10 +28,11 @@ export default function TextBoxNode({ data, selected }) {
   const [fontSize, setFontSize] = useState(0);
   const [width, setWidth] = useState(145);
   const [height, setHeight] = useState(43);
-  const [text, setText] = useState(data.value);
+  const [text, setText] = useState(props.data.value);
+  const projectId = useSelector((state) => state.project?.project?.project._id);
 
   const onChange = useCallback((e) => {
-    data.value = e.target.value;
+    props.data.value = e.target.value;
     setText(e.target.value);
   }, []);
 
@@ -48,12 +51,18 @@ export default function TextBoxNode({ data, selected }) {
     setPopover((prev) => !prev);
   };
 
+  const handleDelete = () => {
+    socket.emit("deleteNode", props.id, projectId, (response) => {
+      console.log(response);
+    });
+    props.setNodes((nodes) => nodes.filter(node => node.id !== props.id));
+  };
   return (
     <>
       <Handle type="target" position={Position.Top} id="b" />
       <Label htmlFor="text">
         <NodeResizer
-          isVisible={selected}
+          isVisible={props.selected}
           color="#d6921e"
           minWidth={145}
           minHeight={42}
@@ -107,8 +116,14 @@ export default function TextBoxNode({ data, selected }) {
                 navigator.clipboard.writeText(textareaRef.current.value)
               }
             >
-              <TbCopy size={16} />
+              <TbCopy size={14} />
             </button>
+              <button
+                className="hover:bg-slate-200 gap-2 p-1"
+                onClick={handleDelete} 
+              >
+                <MdDeleteOutline size={16}/>
+              </button>
           </motion.div>
         )}
       </AnimatePresence>

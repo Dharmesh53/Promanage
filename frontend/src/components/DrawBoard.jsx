@@ -1,6 +1,8 @@
+import socket from "@/lib/socket";
 import TextBoxNode from "@/lib/Nodes/TextBoxNode";
 import PlainTextNode from "@/lib/Nodes/PlainTextNode";
 import ImageNode from "@/lib/Nodes/ImageNode";
+import { useSelector } from "react-redux";
 import {
   createSquare,
   createCircle,
@@ -11,7 +13,7 @@ import {
 // import { useDispatch } from "react-redux";
 // import { setDrawing } from "@/store/drawBoardSlice";
 import ShapeNode from "@/lib/Nodes/ShapeNode";
-import React, { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -20,7 +22,6 @@ import ReactFlow, {
   applyEdgeChanges,
   applyNodeChanges,
 } from "reactflow";
-import { LuPen } from "react-icons/lu";
 import { FaRegSquare } from "react-icons/fa6";
 import { FaRegCircle } from "react-icons/fa";
 import { LuTextCursor } from "react-icons/lu";
@@ -29,19 +30,21 @@ import { IoImageOutline } from "react-icons/io5";
 import "reactflow/dist/style.css";
 import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-export default function DrawBoard() {
+
+export default function DrawBoard({className}) {
   // const dispatch = useDispatch();
+  const projectId = useSelector((state) => state.project?.project?.project?._id);
   const divRef = useRef(null);
   const imageRef = useRef(null);
-  const [nodes, setNodes] = useState(INITIAL_NODES);
+  const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
 
   const nodeTypes = useMemo(
     () => ({
-      textBox: TextBoxNode,
-      plaintext: PlainTextNode,
-      image: ImageNode,
-      shape: ShapeNode,
+      textBox: (props) => <TextBoxNode {...props} nodes={nodes} setNodes={setNodes} />,
+      plaintext: (props) => <PlainTextNode {...props} nodes={nodes} setNodes={setNodes} />,
+      image: (props) => <ImageNode {...props} nodes={nodes} setNodes={setNodes} />,
+      shape: (props) => <ShapeNode {...props} nodes={nodes} setNodes={setNodes} />,
     }),
     []
   );
@@ -62,9 +65,66 @@ export default function DrawBoard() {
     [setEdges]
   );
 
+  const CreateNode = async (type) => {
+    var node = null;
+    switch (type) {
+      case "square":
+        node = createSquare(divRef);
+        break;
+      case "circle":
+        node = createCircle(divRef);
+        break;
+      case "plaintext":
+        node = createPlainText(divRef);
+        break;
+      case "textbox":
+        node = createTextBox(divRef);
+        break;
+      case "image":
+        node = await insertImage(divRef, imageRef);
+        break;
+      default:
+        node = null;
+    }
+    if (node && projectId) {
+       socket.emit("newNode", node, projectId, (response) => {
+         console.log(response);
+       });
+      setNodes((prev) => [...prev, node]);
+    }
+  };
+
+  useEffect(() => {
+    socket.emit('joinRoom', projectId, (response) => {
+      console.log(response);
+    })
+  },[projectId])
+  
+  useEffect(() => {
+    socket.on('loadNodesAndEdges', (data) => {
+      setNodes(data.roomNodes)
+      setEdges(data.roomEdges)
+    })
+    return () => {
+      socket.off('loadNodesAndEdges');
+    };
+  },[nodes])
+  
+  useEffect(() => {
+    socket.emit('movement',nodes, edges, projectId);
+  },[nodes,edges])
+
+  useEffect(() => {
+    if(edges.length > 0) {
+      socket.emit('updateEdges', edges, projectId, (response) => {
+        console.log(response)
+      })
+    }
+  }, [edges])
+
   return (
     <div
-      className="w-[78.5vw] h-[88vh] border-2 rounded-md relative"
+      className={`${className} border-2 rounded-md relative`}
       ref={divRef}
     >
       <ReactFlow
@@ -84,11 +144,7 @@ export default function DrawBoard() {
         ref={imageRef}
         className="hidden"
         accept="image/*"
-        onChange={() =>
-          insertImage(divRef, imageRef).then((imageNode) => {
-            setNodes((prev) => [...prev, imageNode]);
-          })
-        }
+        onChange={() => CreateNode("image")}
       />
       <AnimatePresence>
         <motion.div
@@ -107,27 +163,25 @@ export default function DrawBoard() {
         </button> */}
           <button
             className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => setNodes((prev) => [...prev, createSquare(divRef)])}
+            onClick={() => CreateNode("square")}
           >
             <FaRegSquare size={20} />
           </button>
           <button
             className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => setNodes((prev) => [...prev, createCircle(divRef)])}
+            onClick={() => CreateNode("circle")}
           >
             <FaRegCircle size={20} />
           </button>
           <button
             className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() =>
-              setNodes((prev) => [...prev, createPlainText(divRef)])
-            }
+            onClick={() => CreateNode("plaintext")}
           >
             <LuTextCursor size={18} />
           </button>
           <button
             className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => setNodes((prev) => [...prev, createTextBox(divRef)])}
+            onClick={() => CreateNode("textbox")}
           >
             <PiTextbox size={30} />
           </button>
@@ -135,7 +189,6 @@ export default function DrawBoard() {
             className="focus-within:bg-neutral-200 rounded p-1 px-3"
             onClick={() => {
               imageRef?.current?.click();
-              console.log(nodes);
             }}
           >
             <IoImageOutline size={25} />
