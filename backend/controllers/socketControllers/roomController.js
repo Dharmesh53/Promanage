@@ -11,6 +11,7 @@ const handleRooms = (socket, io) =>  {
         }
       }); 
       socket.join(projectId)
+      console.log(socket.rooms)
       const res = await Project.findById(projectId);
       const data = {
         roomNodes : res.roomNodes || [],

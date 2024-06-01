@@ -1,4 +1,5 @@
 import socket from "@/lib/socket";
+import { throttle } from '@/lib/utils';
 import TextBoxNode from "@/lib/Nodes/TextBoxNode";
 import PlainTextNode from "@/lib/Nodes/PlainTextNode";
 import ImageNode from "@/lib/Nodes/ImageNode";
@@ -38,6 +39,7 @@ export default function DrawBoard({className}) {
   const imageRef = useRef(null);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [nodeMoving, setNodeMoving] = useState(null);
 
   const nodeTypes = useMemo(
     () => ({
@@ -64,7 +66,8 @@ export default function DrawBoard({className}) {
     (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
-
+  
+  
   const CreateNode = async (type) => {
     var node = null;
     switch (type) {
@@ -94,6 +97,13 @@ export default function DrawBoard({className}) {
     }
   };
 
+  const throttleEmitEvent = useCallback(
+    throttle((data) => {
+      socket.emit('nodeMove:client', data, projectId);
+    }, 100)
+    ,[projectId]
+  )
+
   useEffect(() => {
     socket.emit('joinRoom', projectId, (response) => {
       console.log(response);
@@ -105,14 +115,37 @@ export default function DrawBoard({className}) {
       setNodes(data.roomNodes)
       setEdges(data.roomEdges)
     })
-    return () => {
-      socket.off('loadNodesAndEdges');
-    };
+   
+    socket.on('nodeMove:server', (transferedNode) => {
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === transferedNode.id
+          ? { ...node, 
+              position: transferedNode?.position || node.position, 
+              width : transferedNode?.width || node.width,
+              height: transferedNode?.height || node.height,
+            }
+          : node
+        )
+      );
+    });
+    
   },[nodes])
   
   useEffect(() => {
-    socket.emit('movement',nodes, edges, projectId);
-  },[nodes,edges])
+    if(nodeMoving) {
+      const nodeIndex = nodes.findIndex((node) => node.id === nodeMoving?.id);
+      const node = {
+        id : nodes[nodeIndex]?.id,
+        position : nodes[nodeIndex]?.position,
+        width : nodes[nodeIndex]?.width,
+        height: nodes[nodeIndex]?.height,
+      }
+      
+      throttleEmitEvent(node)
+    }
+    
+  },[nodes])
 
   useEffect(() => {
     if(edges.length > 0) {
@@ -133,6 +166,12 @@ export default function DrawBoard({className}) {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeDragStart={(e,node) => {
+          setNodeMoving(node)
+        }}
+        onNodeDragStop={() => {
+          setNodeMoving(null)
+        }}
         onConnect={onConnect}
       >
         <Controls />

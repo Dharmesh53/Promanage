@@ -42,16 +42,29 @@ const handleNodes = (socket, io) => {
     }
   });
 
-  socket.on('movement', async(nodes, edges, projectId) => {
+  socket.on('nodeMove:client', async(node, projectId, callback) => {
     try{
-      const data= {
-        roomNodes : nodes,
-        roomEdges : edges
-      }
-      console.log(socket.rooms, "called")
-      socket.to(projectId).emit('loadNodesAndEdges', data) 
+      socket.to(projectId).emit('nodeMove:server', node);
     }
     catch(e) {
+      callback(e);
+    }
+  })
+
+  socket.on('BoxTextChange:client', async(text, projectId, callback) => {
+    try{
+      socket.to(projectId).emit('BoxTextChange:server', text);
+      callback('reached server '); 
+    } catch(e) {
+      callback(e);
+    }
+  })
+  
+  socket.on('PlainTextChange:client', async(text, projectId, callback) => {
+    try{
+      socket.to(projectId).emit('PlainTextChange:server', text);
+      callback('reached server '); 
+    } catch(e) {
       callback(e);
     }
   })

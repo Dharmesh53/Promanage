@@ -1,14 +1,10 @@
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { useRef } from "react";
-import { useCallback } from "react";
-import { NodeResizer } from "reactflow";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { NodeResizer, Handle, Position} from "reactflow";
 import { MdTextIncrease } from "react-icons/md";
 import { TbCopy } from "react-icons/tb";
 import { MdTextDecrease } from "react-icons/md";
-import { Handle, Position } from "reactflow";
-import { motion } from "framer-motion";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { MdDeleteOutline } from "react-icons/md";
 import { useSelector } from "react-redux";
 import socket from "@/lib/socket";
@@ -31,10 +27,13 @@ export default function TextBoxNode(props) {
   const [text, setText] = useState(props.data.value);
   const projectId = useSelector((state) => state.project?.project?.project._id);
 
-  const onChange = useCallback((e) => {
+  const onChange = (e) => {
     props.data.value = e.target.value;
-    setText(e.target.value);
-  }, []);
+    setText(props.data.value);
+    socket.emit('BoxTextChange:client', props.data.value, projectId, (response) => {
+      console.log(response);
+    });
+  }
 
   // function adjustHeight() {
   //   let element = textareaRef.current;
@@ -57,6 +56,13 @@ export default function TextBoxNode(props) {
     });
     props.setNodes((nodes) => nodes.filter(node => node.id !== props.id));
   };
+
+  useEffect(() => {
+    socket.on('BoxTextChange:server', (text) => {
+      console.log('reached to all in room')
+      setText(text)    
+    })
+  }, [props.nodes])
   return (
     <>
       <Handle type="target" position={Position.Top} id="b" />

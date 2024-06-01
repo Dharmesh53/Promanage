@@ -26,7 +26,10 @@ export default function PlainTextNode(props) {
 
   const handleChangeText = () => {
     props.data.value = InputRef.current.value;
-    setText(InputRef.current.value);
+    setText(props.data.value);
+    socket.emit('PlainTextChange:client', props.data.value, projectId, (response) => {
+      console.log(response);
+    });
   };
 
   function adjustHeight() {
@@ -47,6 +50,15 @@ export default function PlainTextNode(props) {
     });
     props.setNodes((nodes) => nodes.filter(node => node.id !== props.id));
   };
+
+  useEffect(() => {
+  
+    socket.on('PlainTextChange:server', (text) => {
+      console.log('reached to all in room')
+      setText(text)    
+    })
+  },[props.node])
+
   return (
     <>
       <div
