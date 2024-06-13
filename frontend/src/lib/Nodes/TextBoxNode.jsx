@@ -30,7 +30,11 @@ export default function TextBoxNode(props) {
   const onChange = (e) => {
     props.data.value = e.target.value;
     setText(props.data.value);
-    socket.emit('BoxTextChange:client', props.data.value, projectId, (response) => {
+    const data = {
+      id : props.id,
+      text : props.data.value,
+    }
+    socket.emit('BoxTextChange:client', data , projectId, (response) => {
       console.log(response);
     });
   }
@@ -58,11 +62,22 @@ export default function TextBoxNode(props) {
   };
 
   useEffect(() => {
-    socket.on('BoxTextChange:server', (text) => {
+    socket.on('BoxTextChange:server', (data) => {
       console.log('reached to all in room')
-      setText(text)    
+      if(props.id === data.id) {
+        setText(data.text)
+        props.data.value = data.text
+      }
+    })
+    socket.on('resize:server', (data)  => {
+      console.log('received from server');
+      if(props.id === data.id) {
+        setWidth(data.width);
+        setHeight(data.height);
+      } 
     })
   }, [props.nodes])
+  
   return (
     <>
       <Handle type="target" position={Position.Top} id="b" />
@@ -75,6 +90,12 @@ export default function TextBoxNode(props) {
           onResize={(event, dimensions) => {
             setWidth(dimensions.width);
             setHeight(dimensions.height);
+            const data = {
+              id : props.id,
+              width : dimensions.width,
+              height : dimensions.height,
+            }
+            socket.emit('resize:client', data,projectId)
           }}
         />
         <textarea

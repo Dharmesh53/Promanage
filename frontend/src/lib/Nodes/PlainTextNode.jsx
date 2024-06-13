@@ -27,7 +27,11 @@ export default function PlainTextNode(props) {
   const handleChangeText = () => {
     props.data.value = InputRef.current.value;
     setText(props.data.value);
-    socket.emit('PlainTextChange:client', props.data.value, projectId, (response) => {
+    const data = {
+      id : props.id,
+      text : props.data.value,
+    }
+    socket.emit('PlainTextChange:client', data, projectId, (response) => {
       console.log(response);
     });
   };
@@ -53,9 +57,12 @@ export default function PlainTextNode(props) {
 
   useEffect(() => {
   
-    socket.on('PlainTextChange:server', (text) => {
+    socket.on('PlainTextChange:server', (data) => {
       console.log('reached to all in room')
-      setText(text)    
+      if(props.id === data.id) {
+        setText(data.text)
+        props.data.value = data.text
+      }
     })
   },[props.node])
 

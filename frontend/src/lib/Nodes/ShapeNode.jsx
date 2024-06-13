@@ -1,31 +1,59 @@
-import React, { useRef, useState } from "react";
-import { NodeResizer } from "reactflow";
-import { Handle, Position } from "reactflow";
-import { motion, AnimatePresence } from "framer-motion";
-import { TwitterPicker } from "react-color";
-import { MdDeleteOutline } from "react-icons/md";
-import { CgColorBucket } from "react-icons/cg";
-import { useSelector } from "react-redux";
-import socket from "@/lib/socket";
+import { useRef, useState, useEffect } from 'react'
+import { NodeResizer } from 'reactflow'
+import { Handle, Position } from 'reactflow'
+import { motion, AnimatePresence } from 'framer-motion'
+import { TwitterPicker } from 'react-color'
+import { MdDeleteOutline } from 'react-icons/md'
+import { CgColorBucket } from 'react-icons/cg'
+import { useSelector } from 'react-redux'
+import socket from '@/lib/socket'
 
 const ShapeNode = (props) => {
-  const shapeRef = useRef(null);
-  const [popover, setPopover] = useState(false);
-  const [colorPickerVisible, setColorPickerVisible] = useState(false);
-  const [bgColor, setBgColor] = useState("#ccc");
-  const projectId = useSelector((state) => state.project?.project?.project._id);
+  const shapeRef = useRef(null)
+  const [popover, setPopover] = useState(false)
+  const [colorPickerVisible, setColorPickerVisible] = useState(false)
+  const [bgColor, setBgColor] = useState(props?.data?.color || '#ccc')
+  const [size, setSize] = useState({ width: '100%', height: '100%' })
+  const projectId = useSelector((state) => state.project?.project?.project._id)
 
   const handleColorChange = (color) => {
-    setBgColor(color.hex);
-    setColorPickerVisible(false);
-  };
+    setBgColor(color.hex)
+    const data = {
+      id: props.id,
+      color: color.hex,
+    }
+    socket.emit('colorChange:client', data, projectId, (response) => {
+      console.log(response)
+    })
+    setColorPickerVisible(false)
+  }
 
   const handleDelete = () => {
-    socket.emit("deleteNode", props.id, projectId, (response) => {
-      console.log(response);
-    });
-    props.setNodes((nodes) => nodes.filter(node => node.id !== props.id));
-  };
+    socket.emit('deleteNode', props.id, projectId, (response) => {
+      console.log(response)
+    })
+    props.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
+  }
+
+  useEffect(() => {
+    socket.on('resize:server', (data) => {
+      console.log('received from server')
+      if (props.id === data.id) {
+        setSize({ width: data.width, height: data.height })
+      }
+    })
+
+    socket.on('colorChange:server', (data) => {
+      if (data.id == props.id) {
+        props.data.color = data.color
+        setBgColor(data.color)
+      }
+    })
+    return () => {
+      socket.off('resize:server')
+      socket.off('colorChange:server')
+    }
+  }, [props.data, props.id])
 
   return (
     <>
@@ -33,43 +61,56 @@ const ShapeNode = (props) => {
         type="source"
         position={Position.Bottom}
         id="a"
-        style={{ background: "#8c8b85" }}
+        style={{ background: '#8c8b85' }}
       />
       <Handle
         type="target"
         position={Position.Top}
         id="b"
-        style={{ background: "#8c8b85" }}
+        style={{ background: '#8c8b85' }}
       />
       <Handle
         type="target"
         position={Position.Left}
         id="c"
-        style={{ background: "#8c8b85" }}
+        style={{ background: '#8c8b85' }}
       />
       <Handle
         type="target"
         position={Position.Right}
         id="d"
-        style={{ background: "#8c8b85" }}
+        style={{ background: '#8c8b85' }}
       />
       <NodeResizer
         isVisible={props.selected}
         color="#d6921e"
-        minWidth={10}
-        minHeight={10}
+        minWidth={40}
+        minHeight={40}
+        onResize={(event, params) => {
+          const data = {
+            id: props.id,
+            width: params.width,
+            height: params.height,
+          }
+          console.log('send from client')
+          socket.emit('resize:client', data, projectId, (response) => {
+            console.log(response)
+          })
+        }}
       />
       <div
         ref={shapeRef}
         onContextMenu={(e) => {
-          e.preventDefault();
-          setPopover((prev) => !prev);
+          e.preventDefault()
+          setPopover((prev) => !prev)
         }}
-        className={`bg-[#22194d] shape ${
-          props.data.shape === "square" ? "rounded-lg" : "rounded-full"
-        } w-full h-full min-h-10 min-w-10`}
+        className={`bg-[#22194d] ${
+          props.data.shape === 'square' ? 'rounded-lg' : 'rounded-full'
+        } h-full min-w-10 min-h-10`}
         style={{
           backgroundColor: bgColor,
+          width: size.width,
+          height: size.height,
         }}
       >
         <AnimatePresence>
@@ -88,7 +129,7 @@ const ShapeNode = (props) => {
               </button>
               <button
                 className="hover:bg-slate-200 gap-2 p-1"
-                 onClick={handleDelete}
+                onClick={handleDelete}
               >
                 <MdDeleteOutline size={16} />
               </button>
@@ -106,7 +147,7 @@ const ShapeNode = (props) => {
         </AnimatePresence>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default ShapeNode;
+export default ShapeNode
