@@ -7,8 +7,10 @@ import { MdDeleteOutline } from 'react-icons/md'
 import { CgColorBucket } from 'react-icons/cg'
 import { useSelector } from 'react-redux'
 import socket from '@/lib/socket'
+import { useReactFlow } from 'reactflow'
 
 const ShapeNode = (props) => {
+  const reactFlow = useReactFlow()
   const shapeRef = useRef(null)
   const [popover, setPopover] = useState(false)
   const [colorPickerVisible, setColorPickerVisible] = useState(false)
@@ -29,29 +31,32 @@ const ShapeNode = (props) => {
   }
 
   const handleDelete = () => {
-    socket.emit('deleteNode', props.id, projectId, (response) => {
+    reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
+    socket.emit('deleteNode:client', props.id, projectId, (response) => {
       console.log(response)
     })
-    props.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
   }
 
   useEffect(() => {
-    socket.on('resize:server', (data) => {
+    const handleResize = (data) => {
       console.log('received from server')
       if (props.id === data.id) {
         setSize({ width: data.width, height: data.height })
       }
-    })
+    }
 
-    socket.on('colorChange:server', (data) => {
+    const handleColor = (data) => {
       if (data.id == props.id) {
         props.data.color = data.color
         setBgColor(data.color)
       }
-    })
+    }
+    socket.on('resize:server', handleResize)
+    socket.on('colorChange:server', handleColor)
+
     return () => {
-      socket.off('resize:server')
-      socket.off('colorChange:server')
+      socket.off('resize:server', handleResize)
+      socket.off('colorChange:server', handleColor)
     }
   }, [props.data, props.id])
 

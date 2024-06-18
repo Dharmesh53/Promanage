@@ -1,42 +1,44 @@
-import { Label } from "@/components/ui/label";
-import { useState, useRef, useEffect, useCallback } from "react";
-import { NodeResizer, Handle, Position} from "reactflow";
-import { MdTextIncrease } from "react-icons/md";
-import { TbCopy } from "react-icons/tb";
-import { MdTextDecrease } from "react-icons/md";
-import { AnimatePresence, motion } from "framer-motion";
-import { MdDeleteOutline } from "react-icons/md";
-import { useSelector } from "react-redux";
-import socket from "@/lib/socket";
+import { Label } from '@/components/ui/label'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { NodeResizer, Handle, Position } from 'reactflow'
+import { MdTextIncrease } from 'react-icons/md'
+import { TbCopy } from 'react-icons/tb'
+import { MdTextDecrease } from 'react-icons/md'
+import { AnimatePresence, motion } from 'framer-motion'
+import { MdDeleteOutline } from 'react-icons/md'
+import { useSelector } from 'react-redux'
+import socket from '@/lib/socket'
+import { useReactFlow } from 'reactflow'
 
 export default function TextBoxNode(props) {
   const Fonts = [
-    "text-xs",
-    "text-sm",
-    "text-md",
-    "text-lg",
-    "text-xl",
-    "text-2xl",
-    "text-3xl",
-  ];
-  const textareaRef = useRef(null);
-  const [popover, setPopover] = useState(false);
-  const [fontSize, setFontSize] = useState(0);
-  const [width, setWidth] = useState(145);
-  const [height, setHeight] = useState(43);
-  const [text, setText] = useState(props.data.value);
-  const projectId = useSelector((state) => state.project?.project?.project._id);
+    'text-xs',
+    'text-sm',
+    'text-md',
+    'text-lg',
+    'text-xl',
+    'text-2xl',
+    'text-3xl',
+  ]
+  const reactFlow = useReactFlow()
+  const textareaRef = useRef(null)
+  const [popover, setPopover] = useState(false)
+  const [fontSize, setFontSize] = useState(0)
+  const [width, setWidth] = useState(145)
+  const [height, setHeight] = useState(43)
+  const [text, setText] = useState(props.data.value)
+  const projectId = useSelector((state) => state.project?.project?.project._id)
 
   const onChange = (e) => {
-    props.data.value = e.target.value;
-    setText(props.data.value);
+    props.data.value = e.target.value
+    setText(props.data.value)
     const data = {
-      id : props.id,
-      text : props.data.value,
+      id: props.id,
+      text: props.data.value,
     }
-    socket.emit('BoxTextChange:client', data , projectId, (response) => {
-      console.log(response);
-    });
+    socket.emit('BoxTextChange:client', data, projectId, (response) => {
+      console.log(response)
+    })
   }
 
   // function adjustHeight() {
@@ -50,34 +52,41 @@ export default function TextBoxNode(props) {
   // }
 
   const handleContextMenu = (event) => {
-    event.preventDefault();
-    setPopover((prev) => !prev);
-  };
+    event.preventDefault()
+    setPopover((prev) => !prev)
+  }
 
   const handleDelete = () => {
-    socket.emit("deleteNode", props.id, projectId, (response) => {
-      console.log(response);
-    });
-    props.setNodes((nodes) => nodes.filter(node => node.id !== props.id));
-  };
+    socket.emit('deleteNode:client', props.id, projectId, (response) => {
+      console.log(response)
+    })
+    reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
+  }
 
   useEffect(() => {
-    socket.on('BoxTextChange:server', (data) => {
+    const handleBoxText = (data) => {
       console.log('reached to all in room')
-      if(props.id === data.id) {
+      if (props.id === data.id) {
         setText(data.text)
         props.data.value = data.text
       }
-    })
-    socket.on('resize:server', (data)  => {
-      console.log('received from server');
-      if(props.id === data.id) {
-        setWidth(data.width);
-        setHeight(data.height);
-      } 
-    })
-  }, [props.nodes])
-  
+    }
+
+    const handleResize = (data) => {
+      console.log('received from server')
+      if (props.id === data.id) {
+        setWidth(data.width)
+        setHeight(data.height)
+      }
+    }
+    socket.on('resize:server', handleResize)
+    socket.on('BoxTextChange:server', handleBoxText)
+    return () => {
+      socket.off('resize:server', handleResize)
+      socket.off('BoxTextChange:server', handleBoxText)
+    }
+  }, [props.data, props.id])
+
   return (
     <>
       <Handle type="target" position={Position.Top} id="b" />
@@ -88,14 +97,14 @@ export default function TextBoxNode(props) {
           minWidth={145}
           minHeight={42}
           onResize={(event, dimensions) => {
-            setWidth(dimensions.width);
-            setHeight(dimensions.height);
+            setWidth(dimensions.width)
+            setHeight(dimensions.height)
             const data = {
-              id : props.id,
-              width : dimensions.width,
-              height : dimensions.height,
+              id: props.id,
+              width: dimensions.width,
+              height: dimensions.height,
             }
-            socket.emit('resize:client', data,projectId)
+            socket.emit('resize:client', data, projectId)
           }}
         />
         <textarea
@@ -126,7 +135,7 @@ export default function TextBoxNode(props) {
             <button
               className="hover:bg-slate-200 gap-2 p-1"
               onClick={() => {
-                setFontSize((prev) => Math.min(prev + 1, 6));
+                setFontSize((prev) => Math.min(prev + 1, 6))
               }}
             >
               <MdTextIncrease size={16} />
@@ -145,16 +154,16 @@ export default function TextBoxNode(props) {
             >
               <TbCopy size={14} />
             </button>
-              <button
-                className="hover:bg-slate-200 gap-2 p-1"
-                onClick={handleDelete} 
-              >
-                <MdDeleteOutline size={16}/>
-              </button>
+            <button
+              className="hover:bg-slate-200 gap-2 p-1"
+              onClick={handleDelete}
+            >
+              <MdDeleteOutline size={16} />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
       <Handle type="source" position={Position.Bottom} id="a" />
     </>
-  );
+  )
 }

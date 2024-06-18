@@ -1,22 +1,3 @@
-/* eslint-disable react/prop-types */
-// import { useDispatch } from "react-redux";
-// import { setDrawing } from "@/store/drawBoardSlice";
-import socket from '@/lib/socket'
-import { throttle } from '@/lib/utils'
-import TextBoxNode from '@/lib/Nodes/TextBoxNode'
-import PlainTextNode from '@/lib/Nodes/PlainTextNode'
-import ImageNode from '@/lib/Nodes/ImageNode'
-import customEdge from '@/lib/Edges/customEdge'
-import { useSelector } from 'react-redux'
-import {
-  createSquare,
-  createCircle,
-  createPlainText,
-  createTextBox,
-  insertImage,
-} from '@/lib/createNodes'
-import ShapeNode from '@/lib/Nodes/ShapeNode'
-import { useCallback, useState, useMemo, useEffect } from 'react'
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -25,19 +6,44 @@ import ReactFlow, {
   applyEdgeChanges,
   applyNodeChanges,
 } from 'reactflow'
+import { useCallback, useState, useMemo, useEffect, useRef } from 'react'
+import { useSelector } from 'react-redux'
 import { FaRegSquare } from 'react-icons/fa6'
 import { FaRegCircle } from 'react-icons/fa'
 import { LuTextCursor } from 'react-icons/lu'
 import { PiTextbox } from 'react-icons/pi'
 import { IoImageOutline } from 'react-icons/io5'
-import 'reactflow/dist/style.css'
-import { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import 'reactflow/dist/style.css'
+
+import socket from '@/lib/socket'
+import { throttle } from '@/lib/utils'
+import TextBoxNode from '@/lib/Nodes/TextBoxNode'
+import PlainTextNode from '@/lib/Nodes/PlainTextNode'
+import ImageNode from '@/lib/Nodes/ImageNode'
+import CustomEdge from '@/lib/Edges/customEdge'
+import ShapeNode from '@/lib/Nodes/ShapeNode'
+import {
+  createSquare,
+  createCircle,
+  createPlainText,
+  createTextBox,
+  insertImage,
+} from '@/lib/createNodes'
+
+const nodeTypes = {
+  textBox: TextBoxNode,
+  plaintext: PlainTextNode,
+  image: ImageNode,
+  shape: ShapeNode,
+}
+
+const edgeTypes = {
+  customEdge: CustomEdge,
+}
 
 export default function DrawBoard({ className }) {
   // **************** Components States ****************
-
-  // const dispatch = useDispatch();
   const projectId = useSelector((state) => state.project?.project?.project?._id)
   const divRef = useRef(null)
   const imageRef = useRef(null)
@@ -46,43 +52,17 @@ export default function DrawBoard({ className }) {
   const [nodeMoving, setNodeMoving] = useState(null)
 
   //  Nodes and edges types ****************
-  const nodeTypes = useMemo(
-    () => ({
-      textBox: (props) => (
-        <TextBoxNode {...props} nodes={nodes} setNodes={setNodes} />
-      ),
-      plaintext: (props) => (
-        <PlainTextNode {...props} nodes={nodes} setNodes={setNodes} />
-      ),
-      image: (props) => (
-        <ImageNode {...props} nodes={nodes} setNodes={setNodes} />
-      ),
-      shape: (props) => (
-        <ShapeNode {...props} nodes={nodes} setNodes={setNodes} />
-      ),
-    }),
-    []
-  )
-
-  const edgeTypes = useMemo(
-    () => ({
-      customEdge: customEdge,
-    }),
-    []
-  )
+  const memoizedNodeTypes = useMemo(() => nodeTypes, [])
+  const memoizedEdgeTypes = useMemo(() => edgeTypes, [])
 
   //  Nodes and Edges update functions ****************
+  const onNodesChange = useCallback((changes) => {
+    setNodes((nds) => applyNodeChanges(changes, nds))
+  }, [])
 
-  const onNodesChange = useCallback(
-    (changes) => {
-      setNodes((nds) => applyNodeChanges(changes, nds))
-    },
-    [setNodes]
-  )
-  const onEdgesChange = useCallback(
-    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    [setEdges]
-  )
+  const onEdgesChange = useCallback((changes) => {
+    setEdges((eds) => applyEdgeChanges(changes, eds))
+  }, [])
 
   const onConnect = useCallback(
     (params) => {
@@ -95,13 +75,13 @@ export default function DrawBoard({ className }) {
         return newEdges
       })
     },
-    [setEdges]
+    [projectId]
   )
 
   //  Create Nodes ****************
-
   const CreateNode = async (type) => {
     var node = null
+    console.log('hello')
     switch (type) {
       case 'square':
         node = createSquare(divRef)
@@ -122,7 +102,7 @@ export default function DrawBoard({ className }) {
         node = null
     }
     if (node && projectId) {
-      socket.emit('newNode', node, projectId, (response) => {
+      socket.emit('newNode:client', node, projectId, (response) => {
         console.log(response)
       })
       setNodes((prev) => [...prev, node])
@@ -130,12 +110,9 @@ export default function DrawBoard({ className }) {
   }
 
   //  Throttle the Nodes for collobrations ****************
-
   const throttleEmitEvent = throttle((data) => {
     socket.emit('nodeMove:client', data, projectId)
   }, 100)
-
-  //  Socket events ****************
 
   // --- Join Room on Drawboard mounts ---
   useEffect(() => {
@@ -152,8 +129,8 @@ export default function DrawBoard({ className }) {
     }
 
     const handleNodeMove = (transferedNode) => {
-      setNodes((nds) =>
-        nds.map((node) =>
+      setNodes((nds) => {
+        return nds.map((node) =>
           node.id === transferedNode.id
             ? {
                 ...node,
@@ -163,24 +140,29 @@ export default function DrawBoard({ className }) {
               }
             : node
         )
-      )
+      })
     }
 
     const handleDeleteNode = (id) => {
       setNodes((nodes) => nodes.filter((node) => node.id !== id))
     }
 
-    socket.on('updateEdges:server', (edges) => {
-      setEdges(edges)
-    })
+    const handleUpdateEdges = (edges) => setEdges(edges)
+
+    const handleNewNode = (node) => setNodes((prev) => [...prev, node])
+
     socket.on('nodeMove:server', handleNodeMove)
+    socket.on('newNode:server', handleNewNode)
     socket.on('deleteNode:server', handleDeleteNode)
     socket.on('loadNodesAndEdges', handleLoadNodesAndEdges)
+    socket.on('updateEdges:server', handleUpdateEdges)
 
     return () => {
       socket.off('loadNodesAndEdges', handleLoadNodesAndEdges)
       socket.off('nodeMove:server', handleNodeMove)
-      socket.off('updateEdges:server')
+      socket.off('updateEdges:server', handleUpdateEdges)
+      socket.off('deleteNode:server', handleDeleteNode)
+      socket.off('newNode:server', handleNewNode)
     }
   }, [])
 
@@ -198,19 +180,16 @@ export default function DrawBoard({ className }) {
     }
   }, [nodes, nodeMoving, throttleEmitEvent])
 
-  // ---- Handle Edge Updates from Server ----
-  useEffect(() => {}, [])
-
   return (
     <div className={`${className} border-2 rounded-md relative`} ref={divRef}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
+        nodeTypes={memoizedNodeTypes}
+        edgeTypes={memoizedEdgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onNodeDragStart={(e, node) => {
+        onNodeDragStart={(event, node) => {
           setNodeMoving(node)
         }}
         onNodeDragStop={() => {
@@ -236,14 +215,6 @@ export default function DrawBoard({ className }) {
           exit={{ opacity: 0, y: -5 }}
           className="bg-white flex absolute top-0 tools rounded"
         >
-          {/* <button
-          className="focus-within:bg-neutral-200 rounded p-1 px-3"
-          onClick={() => {
-            dispatch(setDrawing(true));
-          }}
-        >
-          <LuPen size={20} />
-        </button> */}
           <button
             className="focus-within:bg-neutral-200 rounded p-1 px-3"
             onClick={() => CreateNode('square')}

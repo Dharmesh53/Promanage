@@ -1,76 +1,82 @@
-import { useRef, useState } from "react";
-import { MdTextIncrease } from "react-icons/md";
-import { TbCopy } from "react-icons/tb";
-import { MdTextDecrease } from "react-icons/md";
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
-import { MdDeleteOutline } from "react-icons/md";
-import { useSelector } from "react-redux";
-import socket from "@/lib/socket";
+import { useRef, useState } from 'react'
+import { MdTextIncrease } from 'react-icons/md'
+import { TbCopy } from 'react-icons/tb'
+import { MdTextDecrease } from 'react-icons/md'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
+import { MdDeleteOutline } from 'react-icons/md'
+import { useSelector } from 'react-redux'
+import socket from '@/lib/socket'
+import { useReactFlow } from 'reactflow'
 
 export default function PlainTextNode(props) {
   const Fonts = [
-    "text-xs",
-    "text-sm",
-    "text-md",
-    "text-lg",
-    "text-xl",
-    "text-2xl",
-    "text-3xl",
-  ];
-  const [text, setText] = useState(props.data.value);
-  const [fontSize, setFontSize] = useState(0);
-  const [popover, setPopover] = useState(false);
-  const InputRef = useRef(null);
-  const projectId = useSelector((state) => state.project?.project?.project._id);
+    'text-xs',
+    'text-sm',
+    'text-md',
+    'text-lg',
+    'text-xl',
+    'text-2xl',
+    'text-3xl',
+  ]
+  const reactFlow = useReactFlow()
+  const [text, setText] = useState(props.data.value)
+  const [fontSize, setFontSize] = useState(0)
+  const [popover, setPopover] = useState(false)
+  const InputRef = useRef(null)
+  const projectId = useSelector((state) => state.project?.project?.project._id)
 
   const handleChangeText = () => {
-    props.data.value = InputRef.current.value;
-    setText(props.data.value);
+    props.data.value = InputRef.current.value
+    setText(props.data.value)
     const data = {
-      id : props.id,
-      text : props.data.value,
+      id: props.id,
+      text: props.data.value,
     }
     socket.emit('PlainTextChange:client', data, projectId, (response) => {
-      console.log(response);
-    });
-  };
+      console.log(response)
+    })
+  }
 
   function adjustHeight() {
-    const element = InputRef.current;
+    const element = InputRef.current
     if (element) {
-      element.style.height = "auto";
-      element.style.height = `${element.scrollHeight}px`;
-      element.style.width = "auto";
-      element.style.width = `${element.scrollWidth}px`;
+      element.style.height = 'auto'
+      element.style.height = `${element.scrollHeight}px`
+      element.style.width = 'auto'
+      element.style.width = `${element.scrollWidth}px`
     }
   }
 
-  useEffect(adjustHeight, [fontSize]);
+  useEffect(adjustHeight, [fontSize])
 
   const handleDelete = () => {
-    socket.emit("deleteNode", props.id, projectId, (response) => {
-      console.log(response);
-    });
-    props.setNodes((nodes) => nodes.filter(node => node.id !== props.id));
-  };
+    socket.emit('deleteNode:client', props.id, projectId, (response) => {
+      console.log(response)
+    })
+    reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
+  }
 
   useEffect(() => {
-  
-    socket.on('PlainTextChange:server', (data) => {
+    const handleTextChange = (data) => {
       console.log('reached to all in room')
-      if(props.id === data.id) {
+      if (props.id === data.id) {
         setText(data.text)
         props.data.value = data.text
       }
-    })
-  },[props.node])
+    }
+    socket.on('PlainTextChange:server', handleTextChange)
+
+    return () => {
+      socket.off('PlainTextChange:server', handleTextChange)
+    }
+  }, [props.data, props.id])
 
   return (
     <>
       <div
         className={`${
-          InputRef?.current?.value.trim() ? "" : "border"
+          InputRef?.current?.value.trim() ? '' : 'border'
         } max-h-[80rem]  rounded`}
       >
         <input
@@ -78,8 +84,8 @@ export default function PlainTextNode(props) {
           id="text"
           name="text"
           onContextMenu={(e) => {
-            e.preventDefault();
-            setPopover((prev) => !prev);
+            e.preventDefault()
+            setPopover((prev) => !prev)
           }}
           value={text}
           placeholder="Enter Text"
@@ -98,8 +104,8 @@ export default function PlainTextNode(props) {
               <button
                 className="hover:bg-slate-200 gap-2 p-1"
                 onClick={() => {
-                  setFontSize((prev) => Math.min(prev + 1, 6));
-                  console.log(InputRef.current.classList);
+                  setFontSize((prev) => Math.min(prev + 1, 6))
+                  console.log(InputRef.current.classList)
                 }}
               >
                 <MdTextIncrease size={16} />
@@ -120,14 +126,14 @@ export default function PlainTextNode(props) {
               </button>
               <button
                 className="hover:bg-slate-200 gap-2 p-1"
-                onClick={handleDelete} 
+                onClick={handleDelete}
               >
-                <MdDeleteOutline size={16}/>
+                <MdDeleteOutline size={16} />
               </button>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </>
-  );
+  )
 }

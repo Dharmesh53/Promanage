@@ -10,10 +10,10 @@ module.exports = {
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: '18.2' } },
-  plugins: ['react-refresh', 'prettier', 'react'],
+  plugins: ['react-refresh', 'react'],
   rules: {
     'react/prop-types': 'off',
-    'prettier/prettier': 'error',
+    'prettier/prettier': 'off',
     'no-unused-vars': 'off',
     'no-console': 'off',
     'func-names': 'off',

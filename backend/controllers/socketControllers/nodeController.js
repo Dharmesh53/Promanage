@@ -1,13 +1,14 @@
 const Project = require("../../models/project");
 
 const handleNodes = (socket, io) => {
-  socket.on("newNode", async (node, projectId, callback) => {
+  socket.on("newNode:client", async (node, projectId, callback) => {
     try {
       const res = await Project.findOneAndUpdate(
         { _id: projectId },
         { $push: { roomNodes: node } },
-        { new: true }
+        { new: true },
       );
+      socket.to(projectId).emit("newNode:server", node);
       if (res) callback("done");
       else throw Error("Something went wrong");
     } catch (error) {
@@ -15,11 +16,11 @@ const handleNodes = (socket, io) => {
     }
   });
 
-  socket.on("deleteNode", async (nodeId, projectId, callback) => {
+  socket.on("deleteNode:client", async (nodeId, projectId, callback) => {
     try {
       const res = await Project.findOneAndUpdate(
         { _id: projectId },
-        { $pull: { roomNodes: { id: nodeId } } }
+        { $pull: { roomNodes: { id: nodeId } } },
       );
       socket.to(projectId).emit("deleteNode:server", nodeId);
       if (res) callback("done", res);
@@ -34,7 +35,7 @@ const handleNodes = (socket, io) => {
       console.log(edges);
       const res = await Project.findOneAndUpdate(
         { _id: projectId },
-        { $set: { roomEdges: edges } }
+        { $set: { roomEdges: edges } },
       );
       socket.to(projectId).emit("updateEdges:server", edges);
       if (res) callback("done with edges");
