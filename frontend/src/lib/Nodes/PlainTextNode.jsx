@@ -20,8 +20,8 @@ export default function PlainTextNode(props) {
     'text-3xl',
   ]
   const reactFlow = useReactFlow()
-  const [text, setText] = useState(props.data.value)
-  const [fontSize, setFontSize] = useState(0)
+  const [text, setText] = useState(props.data?.value)
+  const [fontSize, setFontSize] = useState(props.data?.fontSize || 0)
   const [popover, setPopover] = useState(false)
   const InputRef = useRef(null)
   const projectId = useSelector((state) => state.project?.project?.project._id)
@@ -57,6 +57,33 @@ export default function PlainTextNode(props) {
     reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
   }
 
+  const handleTextChange = (direction) => {
+    const data = {
+      id: props.id,
+      fontSize: null,
+    }
+
+    if (direction === 'up') {
+      setFontSize((prev) => {
+        const newSize = Math.min(prev + 1, 6)
+        data.fontSize = newSize
+        socket.emit('TextSizeChange:client', data, projectId, (response) => {
+          console.log(response)
+        })
+        return newSize
+      })
+    }
+    if (direction === 'down') {
+      setFontSize((prev) => {
+        const newSize = Math.max(prev - 1, 1)
+        data.fontSize = newSize
+        socket.emit('TextSizeChange:client', data, projectId, (response) => {
+          console.log(response)
+        })
+        return newSize
+      })
+    }
+  }
   useEffect(() => {
     const handleTextChange = (data) => {
       console.log('reached to all in room')
@@ -65,10 +92,19 @@ export default function PlainTextNode(props) {
         props.data.value = data.text
       }
     }
+
+    const handleTextSize = (data) => {
+      if (props.id === data.id) {
+        setFontSize(data.fontSize)
+      }
+    }
+
     socket.on('PlainTextChange:server', handleTextChange)
+    socket.on('TextSizeChange:server', handleTextSize)
 
     return () => {
       socket.off('PlainTextChange:server', handleTextChange)
+      socket.off('TextSizeChange:server', handleTextSize)
     }
   }, [props.data, props.id])
 
@@ -103,16 +139,13 @@ export default function PlainTextNode(props) {
             >
               <button
                 className="hover:bg-slate-200 gap-2 p-1"
-                onClick={() => {
-                  setFontSize((prev) => Math.min(prev + 1, 6))
-                  console.log(InputRef.current.classList)
-                }}
+                onClick={() => handleTextChange('up')}
               >
                 <MdTextIncrease size={16} />
               </button>
               <button
                 className="hover:bg-slate-200 gap-2 p-1"
-                onClick={() => setFontSize((prev) => Math.max(prev - 1, 0))}
+                onClick={() => handleTextChange('down')}
               >
                 <MdTextDecrease size={16} />
               </button>

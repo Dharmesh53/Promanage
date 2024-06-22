@@ -7,6 +7,7 @@ import { MdDeleteOutline } from 'react-icons/md'
 import { CgColorBucket } from 'react-icons/cg'
 import { useSelector } from 'react-redux'
 import socket from '@/lib/socket'
+import darker from '@/lib/TurnDarker'
 import { useReactFlow } from 'reactflow'
 
 const ShapeNode = (props) => {
@@ -14,8 +15,11 @@ const ShapeNode = (props) => {
   const shapeRef = useRef(null)
   const [popover, setPopover] = useState(false)
   const [colorPickerVisible, setColorPickerVisible] = useState(false)
-  const [bgColor, setBgColor] = useState(props?.data?.color || '#ccc')
-  const [size, setSize] = useState({ width: '100%', height: '100%' })
+  const [bgColor, setBgColor] = useState(props?.data?.color || '#cccccc')
+  const [size, setSize] = useState({
+    width: props.data?.width || '100%',
+    height: props.data?.height || '100%',
+  })
   const projectId = useSelector((state) => state.project?.project?.project._id)
 
   const handleColorChange = (color) => {
@@ -39,7 +43,6 @@ const ShapeNode = (props) => {
 
   useEffect(() => {
     const handleResize = (data) => {
-      console.log('received from server')
       if (props.id === data.id) {
         setSize({ width: data.width, height: data.height })
       }
@@ -66,25 +69,25 @@ const ShapeNode = (props) => {
         type="source"
         position={Position.Bottom}
         id="a"
-        style={{ background: '#8c8b85' }}
+        style={{ background: darker(bgColor, 20) }}
       />
       <Handle
         type="target"
         position={Position.Top}
         id="b"
-        style={{ background: '#8c8b85' }}
+        style={{ background: darker(bgColor, 20) }}
       />
       <Handle
         type="target"
         position={Position.Left}
         id="c"
-        style={{ background: '#8c8b85' }}
+        style={{ background: darker(bgColor, 20) }}
       />
       <Handle
         type="target"
         position={Position.Right}
         id="d"
-        style={{ background: '#8c8b85' }}
+        style={{ background: darker(bgColor, 20) }}
       />
       <NodeResizer
         isVisible={props.selected}
@@ -97,7 +100,10 @@ const ShapeNode = (props) => {
             width: params.width,
             height: params.height,
           }
-          console.log('send from client')
+          setSize({
+            width: params.width,
+            height: params.height,
+          })
           socket.emit('resize:client', data, projectId, (response) => {
             console.log(response)
           })

@@ -6,26 +6,50 @@ export function cn(...inputs) {
 }
 
 export function throttle(func, delay) {
-  let wait = false
-  let storedArgs = null
-
-  function checkStoredArgs() {
-    if (storedArgs == null) {
-      wait = false
-    } else {
-      func(...storedArgs)
-      storedArgs = null
-      setTimeout(checkStoredArgs, delay)
-    }
-  }
-
+  let inThrottle = false
   return (...args) => {
-    if (wait) {
-      storedArgs = args
-      return
+    if (!inThrottle) {
+      func.apply(this, args)
+      inThrottle = true
+      setTimeout(() => (inThrottle = false), delay)
     }
-    func(...args)
-    wait = true
-    setTimeout(checkStoredArgs, delay)
   }
 }
+
+export function debounce(func, delay) {
+  let timer
+  return (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      func(...args)
+    }, delay)
+  }
+}
+
+// a more complex throttle function don't know why ??
+// .
+// export function throttle(func, delay) {
+//   let wait = false
+//   let storedArgs = null
+//
+//   function checkStoredArgs() {
+//     if (storedArgs == null) {
+//       wait = false
+//     } else {
+//       func(...storedArgs)
+//       storedArgs = null
+//       setTimeout(checkStoredArgs, delay)
+//     }
+//   }
+//
+//   return (...args) => {
+//     if (wait) {
+//       storedArgs = args
+//       return
+//     }
+//     func(...args)
+//     wait = true
+//     setTimeout(checkStoredArgs, delay)
+//   }
+// }
+//

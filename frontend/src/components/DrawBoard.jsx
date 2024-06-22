@@ -23,6 +23,7 @@ import PlainTextNode from '@/lib/Nodes/PlainTextNode'
 import ImageNode from '@/lib/Nodes/ImageNode'
 import CustomEdge from '@/lib/Edges/customEdge'
 import ShapeNode from '@/lib/Nodes/ShapeNode'
+import UserCursor from './ui/userCursor'
 import {
   createSquare,
   createCircle,
@@ -30,6 +31,7 @@ import {
   createTextBox,
   insertImage,
 } from '@/lib/createNodes'
+import getColor from '@/lib/getColor'
 
 const nodeTypes = {
   textBox: TextBoxNode,
@@ -45,11 +47,14 @@ const edgeTypes = {
 export default function DrawBoard({ className }) {
   // **************** Components States ****************
   const projectId = useSelector((state) => state.project?.project?.project?._id)
+  const user = useSelector((state) => state.auth.user)
   const divRef = useRef(null)
   const imageRef = useRef(null)
+  const [onlineUsers, setOnlineUsers] = useState([])
   const [nodes, setNodes] = useState([])
   const [edges, setEdges] = useState([])
   const [nodeMoving, setNodeMoving] = useState(null)
+  const [userCursors, setUserCursors] = useState({})
 
   //  Nodes and edges types ****************
   const memoizedNodeTypes = useMemo(() => nodeTypes, [])
@@ -116,13 +121,32 @@ export default function DrawBoard({ className }) {
 
   // --- Join Room on Drawboard mounts ---
   useEffect(() => {
-    socket.emit('joinRoom', projectId, (response) => {
+    socket.emit('joinRoom:client', user.email, projectId, (response) => {
       console.log(response)
     })
-  }, [projectId])
+
+    const handleMouseMove = throttle((event) => {
+      console.log('fkjghd')
+      const data = {
+        email: user.email,
+        position: { x: event.clientX, y: event.clientY },
+      }
+      socket.emit('mouseMove:client', data, projectId)
+    }, 50)
+
+    document.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [projectId, user])
 
   // --- Load Nodes and Edges, Handle Node Movement, Handle Edges Change ---
   useEffect(() => {
+    const handleJoinRoom = (onlineUsersArray) => {
+      onlineUsersArray = onlineUsersArray.filter((email) => email != user.email)
+      setOnlineUsers(onlineUsersArray)
+    }
     const handleLoadNodesAndEdges = (data) => {
       setNodes(data.roomNodes)
       setEdges(data.roomEdges)
@@ -151,20 +175,29 @@ export default function DrawBoard({ className }) {
 
     const handleNewNode = (node) => setNodes((prev) => [...prev, node])
 
+    const handleMouseMove = (data) => {
+      setUserCursors((prev) => ({
+        ...prev,
+        [data.email]: data.position,
+      }))
+    }
+    socket.on('joinRoom:server', handleJoinRoom)
     socket.on('nodeMove:server', handleNodeMove)
     socket.on('newNode:server', handleNewNode)
     socket.on('deleteNode:server', handleDeleteNode)
     socket.on('loadNodesAndEdges', handleLoadNodesAndEdges)
     socket.on('updateEdges:server', handleUpdateEdges)
-
+    socket.on('mouseMove:server', handleMouseMove)
     return () => {
+      socket.off('joinRoom:server', handleJoinRoom)
       socket.off('loadNodesAndEdges', handleLoadNodesAndEdges)
       socket.off('nodeMove:server', handleNodeMove)
       socket.off('updateEdges:server', handleUpdateEdges)
       socket.off('deleteNode:server', handleDeleteNode)
       socket.off('newNode:server', handleNewNode)
+      socket.off('mouseMove:server', handleMouseMove)
     }
-  }, [])
+  }, [user.email])
 
   // --- Throttle Node Movement Events ---
   useEffect(() => {
@@ -249,6 +282,32 @@ export default function DrawBoard({ className }) {
           </button>
         </motion.div>
       </AnimatePresence>
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -5 }}
+          className="bg-white flex absolute m-1 top-0 right-0 rounded"
+        >
+          {onlineUsers.map((email, i) => (
+            <span
+              key={i}
+              style={{ marginLeft: i * -10 }}
+              className={`rounded-full flex justify-center font-medium text-white items-center size-5 p-3 ${getColor(email)}`}
+            >
+              {email.substring(0, 1).toUpperCase()}
+            </span>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+      {onlineUsers.map((email, i) => (
+        <UserCursor
+          key={email}
+          email={email}
+          position={userCursors[email]}
+          colorClass={getColor(email)}
+        />
+      ))}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { Label } from '@/components/ui/label'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { NodeResizer, Handle, Position } from 'reactflow'
 import { MdTextIncrease } from 'react-icons/md'
 import { TbCopy } from 'react-icons/tb'
@@ -23,11 +23,21 @@ export default function TextBoxNode(props) {
   const reactFlow = useReactFlow()
   const textareaRef = useRef(null)
   const [popover, setPopover] = useState(false)
-  const [fontSize, setFontSize] = useState(0)
-  const [width, setWidth] = useState(145)
-  const [height, setHeight] = useState(43)
-  const [text, setText] = useState(props.data.value)
+  const [fontSize, setFontSize] = useState(props.data?.fontSize || 0)
+  const [width, setWidth] = useState(props.data?.width)
+  const [height, setHeight] = useState(props.data?.height)
+  const [text, setText] = useState(props.data?.value)
   const projectId = useSelector((state) => state.project?.project?.project._id)
+
+  // function adjustHeight() {
+  //   let element = textareaRef.current;
+  //   if (element.scrollHeight < 80 * 16 && element.scrollHeight > height) {
+  //     element.style.height = "1px";
+  //     element.style.height = 5 + element.scrollHeight + "px";
+  //   } else {
+  //     element.style.height = "100px";
+  //   }
+  // }
 
   const onChange = (e) => {
     props.data.value = e.target.value
@@ -41,16 +51,6 @@ export default function TextBoxNode(props) {
     })
   }
 
-  // function adjustHeight() {
-  //   let element = textareaRef.current;
-  //   if (element.scrollHeight < 80 * 16 && element.scrollHeight > height) {
-  //     element.style.height = "1px";
-  //     element.style.height = 5 + element.scrollHeight + "px";
-  //   } else {
-  //     element.style.height = "100px";
-  //   }
-  // }
-
   const handleContextMenu = (event) => {
     event.preventDefault()
     setPopover((prev) => !prev)
@@ -63,9 +63,36 @@ export default function TextBoxNode(props) {
     reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
   }
 
+  const handleTextChange = (direction) => {
+    const data = {
+      id: props.id,
+      fontSize: null,
+    }
+
+    if (direction === 'up') {
+      setFontSize((prev) => {
+        const newSize = Math.min(prev + 1, 6)
+        data.fontSize = newSize
+        socket.emit('TextSizeChange:client', data, projectId, (response) => {
+          console.log(response)
+        })
+        return newSize
+      })
+    }
+    if (direction === 'down') {
+      setFontSize((prev) => {
+        const newSize = Math.max(prev - 1, 1)
+        data.fontSize = newSize
+        socket.emit('TextSizeChange:client', data, projectId, (response) => {
+          console.log(response)
+        })
+        return newSize
+      })
+    }
+  }
+
   useEffect(() => {
     const handleBoxText = (data) => {
-      console.log('reached to all in room')
       if (props.id === data.id) {
         setText(data.text)
         props.data.value = data.text
@@ -73,17 +100,25 @@ export default function TextBoxNode(props) {
     }
 
     const handleResize = (data) => {
-      console.log('received from server')
       if (props.id === data.id) {
         setWidth(data.width)
         setHeight(data.height)
       }
     }
+
+    const handleTextSize = (data) => {
+      if (props.id === data.id) {
+        setFontSize(data.fontSize)
+      }
+    }
+    socket.on('TextSizeChange:server', handleTextSize)
     socket.on('resize:server', handleResize)
     socket.on('BoxTextChange:server', handleBoxText)
+
     return () => {
       socket.off('resize:server', handleResize)
       socket.off('BoxTextChange:server', handleBoxText)
+      socket.off('TextSizeChange:server', handleTextSize)
     }
   }, [props.data, props.id])
 
@@ -119,8 +154,8 @@ export default function TextBoxNode(props) {
           spellCheck="false"
           className={`outline-none resize-none min-h-10 border rounded-lg relative border-black max-h-[80rem] font-chilanka w-36 focus-visible:ring-0 p-1 font-normal overflow-auto  text-center ${Fonts[fontSize]} `}
           style={{
-            width: `${width}px`,
-            height: `${height}px`,
+            width: `${width}px` || '143px',
+            height: `${height}px` || '47px',
           }}
         />
       </Label>
@@ -134,15 +169,13 @@ export default function TextBoxNode(props) {
           >
             <button
               className="hover:bg-slate-200 gap-2 p-1"
-              onClick={() => {
-                setFontSize((prev) => Math.min(prev + 1, 6))
-              }}
+              onClick={() => handleTextChange('up')}
             >
               <MdTextIncrease size={16} />
             </button>
             <button
               className="hover:bg-slate-200 gap-2 p-1"
-              onClick={() => setFontSize((prev) => Math.max(prev - 1, 0))}
+              onClick={() => handleTextChange('down')}
             >
               <MdTextDecrease size={16} />
             </button>
