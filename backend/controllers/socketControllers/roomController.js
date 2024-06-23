@@ -32,16 +32,21 @@ const handleRooms = (socket, io) => {
       };
 
       io.in(projectId).emit("joinRoom:server", usersInRooms[projectId]);
-      if (res) socket.emit("loadNodesAndEdges", data);
-      else throw Error("Something went wrong");
+
+      if (res) {
+        socket.emit("loadNodesAndEdges", data);
+      } else {
+        throw Error("Something went wrong");
+      }
     } catch (error) {
       callback(error);
     }
   });
+
   socket.on("mouseMove:client", async (data, projectId) => {
-    console.log(data);
     socket.to(projectId).emit("mouseMove:server", data);
   });
 };
+
 // io.sockets.adapter.rooms.get(projectId) // fetch clients in a room
 module.exports = { handleRooms };

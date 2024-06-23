@@ -31,7 +31,7 @@ import {
   createTextBox,
   insertImage,
 } from '@/lib/createNodes'
-import getColor from '@/lib/getColor'
+import { getBgColor } from '@/lib/getColor'
 
 const nodeTypes = {
   textBox: TextBoxNode,
@@ -114,10 +114,30 @@ export default function DrawBoard({ className }) {
     }
   }
 
-  //  Throttle the Nodes for collobrations ****************
+  //  Throttled functions for collobrations ****************
   const throttleEmitEvent = throttle((data) => {
     socket.emit('nodeMove:client', data, projectId)
   }, 100)
+
+  const handleMouseMove = useCallback(
+    throttle((event) => {
+      const limitX = window.innerWidth - divRef?.current.clientWidth
+      const limitY = window.innerHeight - divRef?.current.clientHeight
+
+      if (event.clientY > limitY && event.clientX > limitX) {
+        const data = {
+          email: user.email,
+          position: {
+            x: event.clientX - limitX,
+            y: event.clientY - limitY,
+          },
+        }
+
+        socket.emit('mouseMove:client', data, projectId)
+      }
+    }, 50),
+    [projectId, user]
+  )
 
   // --- Join Room on Drawboard mounts ---
   useEffect(() => {
@@ -125,21 +145,12 @@ export default function DrawBoard({ className }) {
       console.log(response)
     })
 
-    const handleMouseMove = throttle((event) => {
-      console.log('fkjghd')
-      const data = {
-        email: user.email,
-        position: { x: event.clientX, y: event.clientY },
-      }
-      socket.emit('mouseMove:client', data, projectId)
-    }, 50)
-
     document.addEventListener('mousemove', handleMouseMove)
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
     }
-  }, [projectId, user])
+  }, [projectId, user, handleMouseMove])
 
   // --- Load Nodes and Edges, Handle Node Movement, Handle Edges Change ---
   useEffect(() => {
@@ -181,6 +192,7 @@ export default function DrawBoard({ className }) {
         [data.email]: data.position,
       }))
     }
+
     socket.on('joinRoom:server', handleJoinRoom)
     socket.on('nodeMove:server', handleNodeMove)
     socket.on('newNode:server', handleNewNode)
@@ -228,7 +240,9 @@ export default function DrawBoard({ className }) {
         onNodeDragStop={() => {
           setNodeMoving(null)
         }}
+        onNodeDrag={handleMouseMove}
         onConnect={onConnect}
+        className="z-10`"
       >
         <Controls />
         <MiniMap zoomable pannable />
@@ -246,7 +260,7 @@ export default function DrawBoard({ className }) {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -5 }}
-          className="bg-white flex absolute top-0 tools rounded"
+          className="bg-white z-20 flex absolute top-0 tools rounded"
         >
           <button
             className="focus-within:bg-neutral-200 rounded p-1 px-3"
@@ -293,7 +307,7 @@ export default function DrawBoard({ className }) {
             <span
               key={i}
               style={{ marginLeft: i * -10 }}
-              className={`rounded-full flex justify-center font-medium text-white items-center size-5 p-3 ${getColor(email)}`}
+              className={`rounded-full z-10 flex justify-center font-medium text-white items-center size-5 p-3 ${getBgColor(email)}`}
             >
               {email.substring(0, 1).toUpperCase()}
             </span>
@@ -302,10 +316,10 @@ export default function DrawBoard({ className }) {
       </AnimatePresence>
       {onlineUsers.map((email, i) => (
         <UserCursor
-          key={email}
+          key={i}
           email={email}
           position={userCursors[email]}
-          colorClass={getColor(email)}
+          colorClass={getBgColor(email)}
         />
       ))}
     </div>
