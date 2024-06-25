@@ -8,8 +8,7 @@ import ReactFlow, {
 } from 'reactflow'
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
-import { FaRegSquare } from 'react-icons/fa6'
-import { FaRegCircle } from 'react-icons/fa'
+import { FaRegSquare, FaRegCircle } from 'react-icons/fa'
 import { LuTextCursor } from 'react-icons/lu'
 import { PiTextbox } from 'react-icons/pi'
 import { IoImageOutline } from 'react-icons/io5'
@@ -32,6 +31,7 @@ import {
   insertImage,
 } from '@/lib/createNodes'
 import { getBgColor } from '@/lib/getColor'
+import useSocketHandlers from '@/lib/useSocketHandlers'
 
 const nodeTypes = {
   textBox: TextBoxNode,
@@ -44,23 +44,53 @@ const edgeTypes = {
   customEdge: CustomEdge,
 }
 
+const ToolButton = ({ icon: Icon, onClick }) => (
+  <button
+    className="focus-within:bg-neutral-200 rounded py-3 px-3"
+    onClick={onClick}
+  >
+    <Icon size={20} />
+  </button>
+)
+
+const ToolBar = ({ CreateNode, imageRef }) => (
+  <AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -5 }}
+      className="bg-white z-20 flex absolute top-0 tools rounded"
+    >
+      <ToolButton icon={FaRegSquare} onClick={() => CreateNode('square')} />
+      <ToolButton icon={FaRegCircle} onClick={() => CreateNode('circle')} />
+      <ToolButton icon={LuTextCursor} onClick={() => CreateNode('plaintext')} />
+      <ToolButton icon={PiTextbox} onClick={() => CreateNode('textbox')} />
+      <ToolButton
+        icon={IoImageOutline}
+        onClick={() => imageRef?.current.click()}
+      />
+    </motion.div>
+  </AnimatePresence>
+)
+
 export default function DrawBoard({ className }) {
-  // **************** Components States ****************
   const projectId = useSelector((state) => state.project?.project?.project?._id)
   const user = useSelector((state) => state.auth.user)
   const divRef = useRef(null)
   const imageRef = useRef(null)
-  const [onlineUsers, setOnlineUsers] = useState([])
   const [nodes, setNodes] = useState([])
   const [edges, setEdges] = useState([])
   const [nodeMoving, setNodeMoving] = useState(null)
-  const [userCursors, setUserCursors] = useState({})
+  const [onlineUsers, userCursors, setUserCursors] = useSocketHandlers(
+    user,
+    projectId,
+    setNodes,
+    setEdges
+  )
 
-  //  Nodes and edges types ****************
   const memoizedNodeTypes = useMemo(() => nodeTypes, [])
   const memoizedEdgeTypes = useMemo(() => edgeTypes, [])
 
-  //  Nodes and Edges update functions ****************
   const onNodesChange = useCallback((changes) => {
     setNodes((nds) => applyNodeChanges(changes, nds))
   }, [])
@@ -83,29 +113,20 @@ export default function DrawBoard({ className }) {
     [projectId]
   )
 
-  //  Create Nodes ****************
+  const createNodeFunctions = {
+    square: createSquare,
+    circle: createCircle,
+    plaintext: createPlainText,
+    textbox: createTextBox,
+    image: insertImage,
+  }
+
   const CreateNode = async (type) => {
-    var node = null
-    console.log('hello')
-    switch (type) {
-      case 'square':
-        node = createSquare(divRef)
-        break
-      case 'circle':
-        node = createCircle(divRef)
-        break
-      case 'plaintext':
-        node = createPlainText(divRef)
-        break
-      case 'textbox':
-        node = createTextBox(divRef)
-        break
-      case 'image':
-        node = await insertImage(divRef, imageRef)
-        break
-      default:
-        node = null
-    }
+    const createNode = createNodeFunctions[type]
+
+    const node =
+      type === 'image' ? await createNode(divRef, imageRef) : createNode(divRef)
+
     if (node && projectId) {
       socket.emit('newNode:client', node, projectId, (response) => {
         console.log(response)
@@ -113,11 +134,6 @@ export default function DrawBoard({ className }) {
       setNodes((prev) => [...prev, node])
     }
   }
-
-  //  Throttled functions for collobrations ****************
-  const throttleEmitEvent = throttle((data) => {
-    socket.emit('nodeMove:client', data, projectId)
-  }, 100)
 
   const handleMouseMove = useCallback(
     throttle((event) => {
@@ -133,85 +149,21 @@ export default function DrawBoard({ className }) {
           },
         }
 
-        socket.emit('mouseMove:client', data, projectId)
+        socket.emit('mouseMove:client', data, projectId, (response) => {
+          console.log(response)
+        })
       }
     }, 50),
     [projectId, user]
   )
 
-  // --- Join Room on Drawboard mounts ---
   useEffect(() => {
-    socket.emit('joinRoom:client', user.email, projectId, (response) => {
-      console.log(response)
-    })
-
     document.addEventListener('mousemove', handleMouseMove)
-
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
     }
-  }, [projectId, user, handleMouseMove])
+  }, [handleMouseMove])
 
-  // --- Load Nodes and Edges, Handle Node Movement, Handle Edges Change ---
-  useEffect(() => {
-    const handleJoinRoom = (onlineUsersArray) => {
-      onlineUsersArray = onlineUsersArray.filter((email) => email != user.email)
-      setOnlineUsers(onlineUsersArray)
-    }
-    const handleLoadNodesAndEdges = (data) => {
-      setNodes(data.roomNodes)
-      setEdges(data.roomEdges)
-    }
-
-    const handleNodeMove = (transferedNode) => {
-      setNodes((nds) => {
-        return nds.map((node) =>
-          node.id === transferedNode.id
-            ? {
-                ...node,
-                position: transferedNode.position || node.position,
-                width: transferedNode.width || node.width,
-                height: transferedNode.height || node.height,
-              }
-            : node
-        )
-      })
-    }
-
-    const handleDeleteNode = (id) => {
-      setNodes((nodes) => nodes.filter((node) => node.id !== id))
-    }
-
-    const handleUpdateEdges = (edges) => setEdges(edges)
-
-    const handleNewNode = (node) => setNodes((prev) => [...prev, node])
-
-    const handleMouseMove = (data) => {
-      setUserCursors((prev) => ({
-        ...prev,
-        [data.email]: data.position,
-      }))
-    }
-
-    socket.on('joinRoom:server', handleJoinRoom)
-    socket.on('nodeMove:server', handleNodeMove)
-    socket.on('newNode:server', handleNewNode)
-    socket.on('deleteNode:server', handleDeleteNode)
-    socket.on('loadNodesAndEdges', handleLoadNodesAndEdges)
-    socket.on('updateEdges:server', handleUpdateEdges)
-    socket.on('mouseMove:server', handleMouseMove)
-    return () => {
-      socket.off('joinRoom:server', handleJoinRoom)
-      socket.off('loadNodesAndEdges', handleLoadNodesAndEdges)
-      socket.off('nodeMove:server', handleNodeMove)
-      socket.off('updateEdges:server', handleUpdateEdges)
-      socket.off('deleteNode:server', handleDeleteNode)
-      socket.off('newNode:server', handleNewNode)
-      socket.off('mouseMove:server', handleMouseMove)
-    }
-  }, [user.email])
-
-  // --- Throttle Node Movement Events ---
   useEffect(() => {
     if (nodeMoving) {
       const nodeIndex = nodes.findIndex((node) => node.id === nodeMoving?.id)
@@ -221,9 +173,15 @@ export default function DrawBoard({ className }) {
         width: nodes[nodeIndex]?.width,
         height: nodes[nodeIndex]?.height,
       }
-      throttleEmitEvent(node)
+      throttle(
+        () =>
+          socket.emit('nodeMove:client', node, projectId, (response) => {
+            console.log(response)
+          }),
+        100
+      )()
     }
-  }, [nodes, nodeMoving, throttleEmitEvent])
+  }, [nodes, nodeMoving, projectId])
 
   return (
     <div className={`${className} border-2 rounded-md relative`} ref={divRef}>
@@ -234,15 +192,11 @@ export default function DrawBoard({ className }) {
         edgeTypes={memoizedEdgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onNodeDragStart={(event, node) => {
-          setNodeMoving(node)
-        }}
-        onNodeDragStop={() => {
-          setNodeMoving(null)
-        }}
+        onNodeDragStart={(event, node) => setNodeMoving(node)}
+        onNodeDragStop={() => setNodeMoving(null)}
         onNodeDrag={handleMouseMove}
         onConnect={onConnect}
-        className="z-10`"
+        className="z-10"
       >
         <Controls />
         <MiniMap zoomable pannable />
@@ -250,52 +204,13 @@ export default function DrawBoard({ className }) {
       </ReactFlow>
       <input
         type="file"
+        id="imageInput"
         ref={imageRef}
         className="hidden"
         accept="image/*"
         onChange={() => CreateNode('image')}
       />
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          className="bg-white z-20 flex absolute top-0 tools rounded"
-        >
-          <button
-            className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => CreateNode('square')}
-          >
-            <FaRegSquare size={20} />
-          </button>
-          <button
-            className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => CreateNode('circle')}
-          >
-            <FaRegCircle size={20} />
-          </button>
-          <button
-            className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => CreateNode('plaintext')}
-          >
-            <LuTextCursor size={18} />
-          </button>
-          <button
-            className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => CreateNode('textbox')}
-          >
-            <PiTextbox size={30} />
-          </button>
-          <button
-            className="focus-within:bg-neutral-200 rounded p-1 px-3"
-            onClick={() => {
-              imageRef?.current?.click()
-            }}
-          >
-            <IoImageOutline size={25} />
-          </button>
-        </motion.div>
-      </AnimatePresence>
+      <ToolBar CreateNode={CreateNode} imageRef={imageRef} />
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: -10 }}

@@ -2,103 +2,120 @@ const Project = require("../../models/project");
 const debounce = require("../../utils/debouce");
 
 const handleNodes = (socket, io) => {
+  // Handle new node creation
   socket.on("newNode:client", async (node, projectId, callback) => {
     try {
-      const res = await Project.findOneAndUpdate(
+      const updatedProject = await Project.findOneAndUpdate(
         { _id: projectId },
         { $push: { roomNodes: node } },
         { new: true },
       );
       socket.to(projectId).emit("newNode:server", node);
-      if (res) callback("done");
-      else throw Error("Something went wrong");
+      if (updatedProject) {
+        callback("done");
+      } else {
+        throw new Error("Something went wrong");
+      }
     } catch (error) {
       callback(error);
     }
   });
 
+  // Handle node deletion
   socket.on("deleteNode:client", async (nodeId, projectId, callback) => {
     try {
-      const res = await Project.findOneAndUpdate(
+      const updatedProject = await Project.findOneAndUpdate(
         { _id: projectId },
         { $pull: { roomNodes: { id: nodeId } } },
       );
       socket.to(projectId).emit("deleteNode:server", nodeId);
-      if (res) callback("done", res);
-      else throw Error("Something went wrong");
+      if (updatedProject) {
+        callback("done", updatedProject);
+      } else {
+        throw new Error("Something went wrong");
+      }
     } catch (error) {
       callback(error);
     }
   });
 
+  // Handle edge updates
   socket.on("updateEdges:client", async (edges, projectId, callback) => {
     try {
-      console.log(edges);
-      const res = await Project.findOneAndUpdate(
+      const updatedProject = await Project.findOneAndUpdate(
         { _id: projectId },
         { $set: { roomEdges: edges } },
       );
       socket.to(projectId).emit("updateEdges:server", edges);
-      if (res) callback("done with edges");
-      else throw Error("Something went wrong");
+      if (updatedProject) {
+        callback("done with edges");
+      } else {
+        throw new Error("Something went wrong");
+      }
     } catch (error) {
       callback(error);
     }
   });
 
+  // Handle node movement
   socket.on("nodeMove:client", async (node, projectId, callback) => {
     try {
       handleSaveNodeProps(projectId, node);
       socket.to(projectId).emit("nodeMove:server", node);
-    } catch (e) {
-      callback(e);
+    } catch (error) {
+      callback(error);
     }
   });
 
+  // Handle box text changes
   socket.on("BoxTextChange:client", async (data, projectId, callback) => {
     try {
       handleSaveNodeProps(projectId, data);
       socket.to(projectId).emit("BoxTextChange:server", data);
       callback("reached server ");
-    } catch (e) {
-      callback(e);
+    } catch (error) {
+      callback(error);
     }
   });
 
+  // Handle plain text changes
   socket.on("PlainTextChange:client", async (data, projectId, callback) => {
     try {
       handleSaveNodeProps(projectId, data);
       socket.to(projectId).emit("PlainTextChange:server", data);
       callback("reached server ");
-    } catch (e) {
-      callback(e);
+    } catch (error) {
+      callback(error);
     }
   });
 
+  // Handle node resizing
   socket.on("resize:client", async (data, projectId, callback) => {
     try {
       handleSaveNodeProps(projectId, data);
       socket.to(projectId).emit("resize:server", data);
-    } catch (e) {
-      callback(e);
+    } catch (error) {
+      callback(error);
     }
   });
 
+  // Handle node color changes
   socket.on("colorChange:client", async (data, projectId, callback) => {
     try {
       handleSaveNodeProps(projectId, data);
       socket.to(projectId).emit("colorChange:server", data);
-    } catch (e) {
-      callback(e);
+    } catch (error) {
+      callback(error);
     }
   });
 
+  // Handle text size changes
   socket.on("TextSizeChange:client", async (data, projectId, callback) => {
     try {
       handleSaveNodeProps(projectId, data);
       socket.to(projectId).emit("TextSizeChange:server", data);
-    } catch (e) {
-      callback(e);
+    } catch (error) {
+      callback(error);
     }
   });
 };
