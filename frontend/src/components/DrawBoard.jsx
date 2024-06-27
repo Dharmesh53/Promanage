@@ -44,12 +44,12 @@ const edgeTypes = {
   customEdge: CustomEdge,
 }
 
-const ToolButton = ({ icon: Icon, onClick }) => (
+const ToolButton = ({ icon: Icon, onClick, Size }) => (
   <button
-    className="focus-within:bg-neutral-200 rounded py-3 px-3"
+    className="focus-within:bg-neutral-200 hover:bg-orange-100 transition-all duration-200 rounded p-2 m-1"
     onClick={onClick}
   >
-    <Icon size={20} />
+    <Icon size={Size} />
   </button>
 )
 
@@ -61,12 +61,29 @@ const ToolBar = ({ CreateNode, imageRef }) => (
       exit={{ opacity: 0, y: -5 }}
       className="bg-white z-20 flex absolute top-0 tools rounded"
     >
-      <ToolButton icon={FaRegSquare} onClick={() => CreateNode('square')} />
-      <ToolButton icon={FaRegCircle} onClick={() => CreateNode('circle')} />
-      <ToolButton icon={LuTextCursor} onClick={() => CreateNode('plaintext')} />
-      <ToolButton icon={PiTextbox} onClick={() => CreateNode('textbox')} />
+      <ToolButton
+        icon={FaRegSquare}
+        Size={20}
+        onClick={() => CreateNode('square')}
+      />
+      <ToolButton
+        icon={FaRegCircle}
+        Size={20}
+        onClick={() => CreateNode('circle')}
+      />
+      <ToolButton
+        icon={LuTextCursor}
+        Size={20}
+        onClick={() => CreateNode('plaintext')}
+      />
+      <ToolButton
+        icon={PiTextbox}
+        Size={28}
+        onClick={() => CreateNode('textbox')}
+      />
       <ToolButton
         icon={IoImageOutline}
+        Size={23}
         onClick={() => imageRef?.current.click()}
       />
     </motion.div>
@@ -125,7 +142,9 @@ export default function DrawBoard({ className }) {
     const createNode = createNodeFunctions[type]
 
     const node =
-      type === 'image' ? await createNode(divRef, imageRef) : createNode(divRef)
+      type === 'image'
+        ? await createNode(divRef, imageRef)
+        : await createNode(divRef)
 
     if (node && projectId) {
       socket.emit('newNode:client', node, projectId, (response) => {

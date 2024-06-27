@@ -99,33 +99,65 @@ export const createTextBox = (divRef) => {
 // }
 //
 
-export const insertImage = async (divRef, imgRef) => {
-  const file = imgRef?.current?.files[0]
-  if (file) {
-    const name = `${uuidv4()}-${file.name}`
+export const insertImage = (divRef, imgRef) => {
+  return new Promise((resolve, reject) => {
+    const file = imgRef?.current?.files[0]
+    if (file) {
+      const img = new Image()
+      const fileURL = URL.createObjectURL(file)
+      img.src = fileURL
 
-    const preSignedUrl = await axios.post(`http://localhost:5000/api/aws/put`, {
-      key: `uploads/user-images/${name}`,
-      contentType: file.type,
-    })
+      img.onload = async function () {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        canvas.style.display = 'none'
 
-    const res = await axios.put(preSignedUrl.data.url, file, {
-      headers: {
-        'Content-Type': file.type,
-      },
-    })
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.drawImage(img, 0, 0)
 
-    const publicUrl = await axios.get(
-      `http://localhost:5000/api/aws/get/${`uploads/user-images/` + name}`
-    )
-    console.log(preSignedUrl.data.url, publicUrl, res)
+        const webp = await new Promise((resolve) => {
+          canvas.toBlob((blob) => resolve(blob), 'image/webp')
+        })
 
-    return {
-      id: uuidv4(),
-      type: 'image',
-      position: getCoords(divRef),
-      data: { imageSrc: publicUrl.url },
-      zIndex: 300,
+        const name = `${uuidv4()}.webp`
+
+        try {
+          const preSignedUrl = await axios.post(
+            `http://localhost:5000/api/aws/put`,
+            {
+              key: `uploads/user-images/${name}`,
+              contentType: webp.type,
+            }
+          )
+
+          await axios.put(preSignedUrl.data.url, file, {
+            headers: {
+              'Content-Type': file.type,
+            },
+          })
+
+          const publicUrl = await axios.get(
+            `http://localhost:5000/api/aws/get/${`uploads/user-images/` + name}`
+          )
+
+          let imageUrl = publicUrl.data.url
+
+          const imageNode = {
+            id: uuidv4(),
+            type: 'image',
+            position: getCoords(divRef),
+            data: { imageSrc: imageUrl },
+            zIndex: 300,
+          }
+
+          resolve(imageNode)
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    } else {
+      reject(new Error('no file selected'))
     }
-  }
+  })
 }
