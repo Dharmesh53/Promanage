@@ -1,4 +1,5 @@
 const Project = require("../../models/project");
+const { deleteImage } = require("../awsController");
 const debounce = require("../../utils/debouce");
 
 const handleNodes = (socket, io) => {
@@ -22,13 +23,18 @@ const handleNodes = (socket, io) => {
   });
 
   // Handle node deletion
-  socket.on("deleteNode:client", async (nodeId, projectId, callback) => {
+  socket.on("deleteNode:client", async (data, projectId, callback) => {
     try {
       const updatedProject = await Project.findOneAndUpdate(
         { _id: projectId },
-        { $pull: { roomNodes: { id: nodeId } } },
+        { $pull: { roomNodes: { id: data.id } } },
       );
-      socket.to(projectId).emit("deleteNode:server", nodeId);
+
+      const urlObj = new URL(data.url);
+      const path = urlObj.pathname;
+
+      deleteImage(path.substring(1));
+      socket.to(projectId).emit("deleteNode:server", data.id);
       if (updatedProject) {
         callback("done", updatedProject);
       } else {

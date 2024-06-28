@@ -15,7 +15,11 @@ const ImageNode = (props) => {
 
   const handleDelete = () => {
     reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
-    socket.emit('deleteNode:client', props.id, projectId, (response) => {
+    const data = {
+      id: props.id,
+      url: props.data?.imageSrc,
+    }
+    socket.emit('deleteNode:client', data, projectId, (response) => {
       console.log(response)
     })
   }

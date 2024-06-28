@@ -9,3 +9,5 @@ Currently, two official plugins are available:
 
 TODO: remove the cursor when the person goes offline
 TODO: image resize \\ delete image \\ image an't load
+TODO: one resized windows and one full window cursor movement sync
+TODO: add blurred background pic

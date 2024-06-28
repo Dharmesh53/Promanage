@@ -43,17 +43,16 @@ const putImage = async (req, res) => {
   }
 };
 
-const deleteImage = async (req, res) => {
+const deleteImage = async (key) => {
   try {
-    const { key } = req.body;
     const command = new DeleteObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
     });
-    await s3Client.send(command);
-    return res.status(200).json({ msg: "done" });
+    const res = await s3Client.send(command);
+    console.log("deleted", res);
   } catch (error) {
-    return res.status(500).json({ msg: error.message });
+    console.log(error);
   }
 };
 

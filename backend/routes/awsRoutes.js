@@ -1,5 +1,9 @@
 const express = require("express");
-const { getImage, putImage } = require("../controllers/awsController");
+const {
+  getImage,
+  putImage,
+  deleteImage,
+} = require("../controllers/awsController");
 const verifyToken = require("../utils/verifyToken");
 
 const router = express.Router();

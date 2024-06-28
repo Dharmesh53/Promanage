@@ -51,7 +51,8 @@ export default function PlainTextNode(props) {
   useEffect(adjustHeight, [fontSize])
 
   const handleDelete = () => {
-    socket.emit('deleteNode:client', props.id, projectId, (response) => {
+    const data = { id: props.id }
+    socket.emit('deleteNode:client', data, projectId, (response) => {
       console.log(response)
     })
     reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
