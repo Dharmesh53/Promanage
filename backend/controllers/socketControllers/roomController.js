@@ -5,14 +5,6 @@ const usersInRooms = {};
 const handleRooms = (socket, io) => {
   socket.on("joinRoom:client", async (email, projectId, callback) => {
     try {
-      const rooms = Array.from(socket.rooms);
-
-      rooms.forEach((room) => {
-        if (room !== socket.id && room !== projectId) {
-          socket.leave(room);
-        }
-      });
-
       if (!usersInRooms[projectId]) {
         usersInRooms[projectId] = [];
       }
@@ -23,7 +15,6 @@ const handleRooms = (socket, io) => {
 
       console.log(usersInRooms);
       socket.join(projectId);
-      console.log(socket.rooms, email);
 
       const res = await Project.findById(projectId);
       const data = {
@@ -41,6 +32,13 @@ const handleRooms = (socket, io) => {
     } catch (error) {
       callback(error);
     }
+  });
+
+  socket.on("leaveRoom:client", (email, projectId) => {
+    usersInRooms[projectId] = usersInRooms[projectId]?.filter(
+      (roomEmail) => roomEmail != email,
+    );
+    io.in(projectId).emit("leaveRoom:server", usersInRooms[projectId]);
   });
 
   socket.on("mouseMove:client", async (data, projectId) => {

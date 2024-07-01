@@ -2,14 +2,17 @@ const mongoose = require("mongoose");
 
 const { Schema, model } = mongoose;
 
-const assigneeSchema = new Schema({
-  name: {
-    type: String,
+const assigneeSchema = new Schema(
+  {
+    name: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
   },
-  email: {
-    type: String,
-  },
-});
+  { _id: false },
+);
 
 const taskSchema = new Schema({
   title: {

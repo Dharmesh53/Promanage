@@ -52,6 +52,7 @@ const useSocketHandlers = (user, projectId, setNodes, setEdges) => {
       }))
     }
 
+    socket.on('leaveRoom:server', handleJoinRoom)
     socket.on('joinRoom:server', handleJoinRoom)
     socket.on('nodeMove:server', handleNodeMove)
     socket.on('newNode:server', handleNewNode)
@@ -61,6 +62,8 @@ const useSocketHandlers = (user, projectId, setNodes, setEdges) => {
     socket.on('mouseMove:server', handleMouseMove)
 
     return () => {
+      socket.emit('leaveRoom:client', user.email, projectId)
+
       socket.off('joinRoom:server', handleJoinRoom)
       socket.off('loadNodesAndEdges', handleLoadNodesAndEdges)
       socket.off('nodeMove:server', handleNodeMove)

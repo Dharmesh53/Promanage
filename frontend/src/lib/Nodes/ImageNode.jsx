@@ -5,12 +5,13 @@ import { MdDeleteOutline } from 'react-icons/md'
 import socket from '@/lib/socket'
 import { useSelector } from 'react-redux'
 import { useReactFlow } from 'reactflow'
+import { useEffect } from 'react'
 
 const ImageNode = (props) => {
   const reactFlow = useReactFlow()
   const projectId = useSelector((state) => state.project?.project?.project._id)
-  const [imageWidth, setImageWidth] = useState(props.width || 'auto')
-  const [imageHeight, setImageHeight] = useState(props.height || 'auto ')
+  const [imageWidth, setImageWidth] = useState(props.data.width || 'auto')
+  const [imageHeight, setImageHeight] = useState(props.data.height || 'auto ')
   const [popover, setPopover] = useState(false)
 
   const handleDelete = () => {
@@ -24,6 +25,19 @@ const ImageNode = (props) => {
     })
   }
 
+  useEffect(() => {
+    const handleResize = (data) => {
+      if (props.id === data.id) {
+        setImageWidth(data.width)
+        setImageHeight(data.height)
+      }
+    }
+    socket.on('resize:server', handleResize)
+    return () => {
+      socket.off('resize:server', handleResize)
+    }
+  }, [props.id])
+
   return (
     <>
       <NodeResizer
@@ -31,10 +45,18 @@ const ImageNode = (props) => {
         color="#d6921e"
         minWidth={100}
         minHeight={100}
-        keepAspectRatio="true"
-        onResize={(width, height) => {
-          setImageWidth(props.width)
-          setImageHeight(props.height)
+        keepAspectRatio="false"
+        onResize={(event, params) => {
+          const data = {
+            id: props.id,
+            width: params.width,
+            height: params.height,
+          }
+          setImageWidth(params.width)
+          setImageHeight(params.height)
+          socket.emit('resize:client', data, projectId, (response) => {
+            console.log(response)
+          })
         }}
       />
       {props.data?.imageSrc && (

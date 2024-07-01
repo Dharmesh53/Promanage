@@ -4,6 +4,8 @@ const Task = require("../models/task");
 const Team = require("../models/team");
 const mongoose = require("mongoose");
 const { ObjectId } = require("mongoose").Types;
+const { taskEmailSender } = require("../emails/newAssignedTaskEmail");
+const { userEmailSender } = require("../emails/newProjectTeamEmail");
 const Cache = require("../utils/Cache");
 
 const createProject = async (req, res) => {
@@ -77,11 +79,22 @@ const addNewTeam = async (req, res) => {
     if (!project) {
       return res.status(404).json({ msg: "Project not found" });
     }
+
     if (project.teams.includes(teamId)) {
       return res.status(400).json({ msg: "Team already exists in project" });
     }
 
     await Project.findByIdAndUpdate(id, { $addToSet: { teams: teamId } });
+
+    const team = await Team.findById(teamId).populate(
+      "users",
+      "_id name email",
+    );
+
+    team.users.forEach((user) => {
+      userEmailSender(user.name, team.title, project.title);
+    });
+
     return res.status(200).json({ msg: "Team added to project" });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
@@ -89,10 +102,15 @@ const addNewTeam = async (req, res) => {
 };
 
 const createProjectTask = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const id = req.query.id;
+
     const { title, status, assigneeObject, due, priority, createdBy } =
       req.body;
+
     const taskData = {
       title,
       status,
@@ -106,15 +124,26 @@ const createProjectTask = async (req, res) => {
 
     const task = new Task(taskData);
     await task.save();
+
     await User.findOneAndUpdate(
       { email: assigneeObject.email },
-      { $push: { tasks: task._id } }
-    );
+      { $push: { tasks: task._id } },
+    ).session(session);
+
     if (id) {
-      await Project.findByIdAndUpdate(id, {
-        $push: { tasks: task._id },
-      });
+      var updatedProject = await Project.findByIdAndUpdate(
+        id,
+        {
+          $push: { tasks: task._id },
+        },
+        { new: true },
+      ).session(session);
     }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    taskEmailSender(task, updatedProject.title);
     return res.status(200).json({ task });
   } catch (error) {
     return res.status(500).json({ msg: error.message });
@@ -122,6 +151,7 @@ const createProjectTask = async (req, res) => {
 };
 
 const updateProjectTask = async (req, res) => {
+  // keep these 2 lines out of try and catch
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -137,12 +167,12 @@ const updateProjectTask = async (req, res) => {
 
     const newCards = cards.map((card) => card._id);
     let deletedCards = project.tasks.filter(
-      (task) => !newCards.includes(String(task))
+      (task) => !newCards.includes(String(task)),
     );
     deletedCards = deletedCards.map((task) => String(task));
 
     let remainingCards = project.tasks.filter((task) =>
-      newCards.includes(String(task))
+      newCards.includes(String(task)),
     );
     remainingCards = remainingCards.map((task) => String(task));
 
@@ -150,7 +180,7 @@ const updateProjectTask = async (req, res) => {
 
     for (let i = 0; i < deletedCards.length; i++) {
       const deletedCard = await Task.findById(
-        new ObjectId(deletedCards[i])
+        new ObjectId(deletedCards[i]),
       ).session(session);
       if (!deletedCard) {
         await session.abortTransaction();
@@ -162,7 +192,7 @@ const updateProjectTask = async (req, res) => {
       const email = deletedCard.assignee.email;
       let user = await User.findOne({ email }).session(session);
       let updatedTasks = user.tasks.filter(
-        (task) => String(task) !== deletedCards[i]
+        (task) => String(task) !== deletedCards[i],
       );
       user.tasks = [...updatedTasks];
       await user.save();
@@ -171,12 +201,12 @@ const updateProjectTask = async (req, res) => {
 
     for (let i = 0; i < remainingCards.length; i++) {
       const completeCard = cards.find((card) =>
-        remainingCards.includes(String(card._id))
+        remainingCards.includes(String(card._id)),
       );
       delete completeCard._id;
       await Task.findOneAndReplace(
         { _id: remainingCards[i] },
-        completeCard
+        completeCard,
       ).session(session);
     }
 

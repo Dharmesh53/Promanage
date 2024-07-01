@@ -29,5 +29,44 @@ const updateTask = async (req, res) => {
   }
 };
 
+const dueTasksFetcher = async () => {
+  const now = new Date();
+  const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+  const tasksWithProjectTitles = await Task.aggregate([
+    {
+      $match: {
+        due: {
+          $gte: now,
+          $lte: twentyFourHoursFromNow,
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "projects",
+        localField: "project",
+        foreignField: "_id",
+        as: "projectDetails",
+      },
+    },
+    {
+      $project: {
+        title: 1,
+        description: 1,
+        assignee: 1,
+        status: 1,
+        progress: 1,
+        due: 1,
+        createdBy: 1,
+        projectTitle: "$projectDetails.title", // Including project title from the joined collection
+      },
+    },
+  ]);
+
+  return tasksWithProjectTitles;
+};
+
 exports.updateTask = updateTask;
 exports.getTask = getTask;
+exports.dueTasksFetcher = dueTasksFetcher;

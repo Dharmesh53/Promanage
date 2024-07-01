@@ -1,13 +1,8 @@
-# React + Vite
+# Promanage
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-TODO: remove the cursor when the person goes offline
-TODO: image resize \\ delete image \\ image an't load
 TODO: one resized windows and one full window cursor movement sync
 TODO: add blurred background pic
+TODO: make image faster
+TODO: aws image aren't loading even after they are having there source
+TODO: update overview when new team is added to a project
+TODO: Update the whole project overview page's add new team selection list when he created a new team
