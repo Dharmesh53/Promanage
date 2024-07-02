@@ -1,15 +1,11 @@
 const express = require("express");
-const {
-  getImage,
-  putImage,
-  deleteImage,
-} = require("../controllers/awsController");
+const { getFile, putFile } = require("../controllers/awsController");
 const verifyToken = require("../utils/verifyToken");
 
 const router = express.Router();
 
-router.get("/get/*", verifyToken, getImage);
+router.get("/get/*", verifyToken, getFile);
 
-router.post("/put", verifyToken, putImage);
+router.post("/put", verifyToken, putFile);
 
 module.exports = router;

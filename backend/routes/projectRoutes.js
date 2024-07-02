@@ -6,6 +6,7 @@ const {
   addNewTeam,
   createProjectTask,
   updateProjectTask,
+  updateProjectFiles,
   deleteProjectTeam,
 } = require("../controllers/projectController");
 const verifyToken = require("../utils/verifyToken");
@@ -20,6 +21,7 @@ router.post("/addTeam/:id", addNewTeam);
 
 router.put("/updateTask/:id", updateProjectTask);
 router.put("/updateProject/:id", updateProject);
+router.put("/newFiles/:id", updateProjectFiles);
 
 router.delete("/removeTeam/:pid/:tid", deleteProjectTeam);
 

@@ -1,5 +1,5 @@
 const Project = require("../../models/project");
-const { deleteImage } = require("../awsController");
+const { deleteFile } = require("../awsController");
 const debounce = require("../../utils/debouce");
 
 const handleNodes = (socket, io) => {
@@ -33,7 +33,7 @@ const handleNodes = (socket, io) => {
       const urlObj = new URL(data.url);
       const path = urlObj.pathname;
 
-      deleteImage(path.substring(1));
+      deleteFile(path.substring(1));
       socket.to(projectId).emit("deleteNode:server", data.id);
       if (updatedProject) {
         callback("done", updatedProject);

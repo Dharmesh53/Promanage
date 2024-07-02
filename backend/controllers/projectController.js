@@ -266,6 +266,18 @@ const deleteProjectTeam = async (req, res) => {
   }
 };
 
+const updateProjectFiles = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const urls = req.body;
+    await Project.findByIdAndUpdate(id, { $push: { files: urls } });
+
+    return res.status(200).json({ msg: "done" });
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+};
+
 exports.createProject = createProject;
 exports.getProject = getProject;
 exports.updateProject = updateProject;
@@ -273,3 +285,4 @@ exports.createProjectTask = createProjectTask;
 exports.updateProjectTask = updateProjectTask;
 exports.addNewTeam = addNewTeam;
 exports.deleteProjectTeam = deleteProjectTeam;
+exports.updateProjectFiles = updateProjectFiles;
