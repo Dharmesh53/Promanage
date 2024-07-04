@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import axios from 'axios'
 import { NodeResizer } from 'reactflow'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MdDeleteOutline } from 'react-icons/md'
@@ -14,12 +15,16 @@ const ImageNode = (props) => {
   const [imageHeight, setImageHeight] = useState(props.data.height || 'auto ')
   const [popover, setPopover] = useState(false)
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     reactFlow.setNodes((nodes) => nodes.filter((node) => node.id !== props.id))
     const data = {
       id: props.id,
-      url: props.data?.imageSrc,
     }
+
+    const segments = props?.data?.imageSrc.split('/')
+    const key = segments.slice(-3).join('/')
+
+    await axios.delete(`http://localhost:5000/api/aws/delete/${key}`)
     socket.emit('deleteNode:client', data, projectId, (response) => {
       console.log(response)
     })

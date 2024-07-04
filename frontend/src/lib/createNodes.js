@@ -99,7 +99,7 @@ export const createTextBox = (divRef) => {
 // }
 //
 
-export const insertImage = (divRef, imgRef) => {
+export const insertImage = (divRef, imgRef, id) => {
   return new Promise((resolve, reject) => {
     const file = imgRef?.current?.files[0]
     if (file) {
@@ -126,7 +126,7 @@ export const insertImage = (divRef, imgRef) => {
           const preSignedUrl = await axios.post(
             `http://localhost:5000/api/aws/put`,
             {
-              key: `uploads/user-images/${name}`,
+              key: `uploads/${id}/${name}`,
               contentType: webp.type,
             }
           )
@@ -137,11 +137,7 @@ export const insertImage = (divRef, imgRef) => {
             },
           })
 
-          const publicUrl = await axios.get(
-            `http://localhost:5000/api/aws/get/${`uploads/user-images/` + name}`
-          )
-
-          let imageUrl = publicUrl.data.url
+          let imageUrl = `https://p-r-o-manage.s3.ap-southeast-2.amazonaws.com/uploads/${id}/${name}`
 
           const imageNode = {
             id: uuidv4(),

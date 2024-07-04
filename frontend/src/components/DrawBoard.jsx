@@ -143,7 +143,7 @@ export default function DrawBoard({ className }) {
 
     const node =
       type === 'image'
-        ? await createNode(divRef, imageRef)
+        ? await createNode(divRef, imageRef, projectId)
         : await createNode(divRef)
 
     if (node && projectId) {

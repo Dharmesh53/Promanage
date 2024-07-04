@@ -1,5 +1,4 @@
 const Project = require("../../models/project");
-const { deleteFile } = require("../awsController");
 const debounce = require("../../utils/debouce");
 
 const handleNodes = (socket, io) => {
@@ -30,10 +29,6 @@ const handleNodes = (socket, io) => {
         { $pull: { roomNodes: { id: data.id } } },
       );
 
-      const urlObj = new URL(data.url);
-      const path = urlObj.pathname;
-
-      deleteFile(path.substring(1));
       socket.to(projectId).emit("deleteNode:server", data.id);
       if (updatedProject) {
         callback("done", updatedProject);
