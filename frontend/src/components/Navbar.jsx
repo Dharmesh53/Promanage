@@ -1,30 +1,30 @@
-import axios from "axios";
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { GrTask } from "react-icons/gr";
-import { HiOutlineInbox } from "react-icons/hi2";
-import { GrProjects } from "react-icons/gr";
-import { RiTeamLine } from "react-icons/ri";
-import { FaPlus } from "react-icons/fa6";
-import { Button } from "./ui/button";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import ProjectForm from "./Projectform";
-import TeamForm from "./Teamform";
+import axios from 'axios'
+import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { GrTask } from 'react-icons/gr'
+import { HiOutlineInbox } from 'react-icons/hi2'
+import { GrProjects } from 'react-icons/gr'
+import { RiTeamLine } from 'react-icons/ri'
+import { FaPlus } from 'react-icons/fa6'
+import { Button } from './ui/button'
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import ProjectForm from './Projectform'
+import TeamForm from './Teamform'
 
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = true
 
 const Navbar = ({ user }) => {
-  const [teams, setTeams] = useState([]);
-  const location = useLocation();
+  const [teams, setTeams] = useState([])
+  const location = useLocation()
 
   const handleTeams = async () => {
-    const res = await axios.get("http://localhost:5000/api/getUserTeams");
-    setTeams(res.data);
-  };
+    const res = await axios.get('http://localhost:5000/api/getUserTeams')
+    setTeams(res.data)
+  }
 
   const isActive = (path) => {
-    return location.pathname.includes(path);
-  };
+    return location.pathname.includes(path)
+  }
 
   return (
     <aside className="h-[95.7vh]  w-full bg-white text-neutral-600">
@@ -33,32 +33,31 @@ const Navbar = ({ user }) => {
           <Link
             to="/tasks"
             className={`flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${
-              isActive("/tasks")
-                ? "bg-amber-200 text-amber-700 font-medium hover:text-amber-700 "
-                : "hover:text-neutral-800"
+              isActive('/tasks')
+                ? 'bg-amber-200 text-amber-700 font-medium hover:text-amber-700 '
+                : 'hover:text-neutral-800'
             }`}
           >
             <GrTask size={18} />
             My Tasks
           </Link>
-          <Link
-            to="/inbox"
-            className={`flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${
-              isActive("/inbox")
-                ? "bg-amber-200 text-amber-700 font-medium hover:text-amber-700"
-                : "hover:text-neutral-800"
-            }`}
-          >
-            <HiOutlineInbox size={18} />
-            Inbox
-          </Link>
+          {/* <Link */}
+          {/*   to="/inbox" */}
+          {/*   className={`flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${ */}
+          {/*     isActive('/inbox') */}
+          {/*       ? 'bg-amber-200 text-amber-700 font-medium hover:text-amber-700' */}
+          {/*       : 'hover:text-neutral-800' */}
+          {/*   }`} */}
+          {/* > */}
+          {/*   <HiOutlineInbox size={18} /> */}
+          {/*   Inbox */}
+          {/* </Link> */}
           <div>
-            <Link
-              to="/projects"
+            <div
               className={`flex items-center justify-between  p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${
-                isActive("/projects")
-                  ? "bg-amber-200 text-amber-700 font-medium hover:text-amber-700"
-                  : "hover:text-neutral-800"
+                isActive('/projects')
+                  ? 'bg-amber-200 text-amber-700 font-medium hover:text-amber-700'
+                  : 'hover:text-neutral-800'
               }`}
             >
               <span className="flex items-center gap-2">
@@ -73,15 +72,15 @@ const Navbar = ({ user }) => {
                   {teams && <ProjectForm teams={teams} />}
                 </Dialog>
               </span>
-            </Link>
+            </div>
             <div>
               {user?.projects.map((item, i) => (
                 <Link to={`/project/${item._id}`} key={i}>
                   <div
                     className={`ml-9 mr-1 mb-2 cursor-pointer p-1 m-auto rounded hover:bg-purple-200  transition-colors duration-300 ${
                       isActive(`/project/${item._id}`)
-                        ? "bg-purple-200 text-purple-700 font-medium hover:text-purple-700"
-                        : "hover:text-neutral-800"
+                        ? 'bg-purple-200 text-purple-700 font-medium hover:text-purple-700'
+                        : 'hover:text-neutral-800'
                     }`}
                   >
                     {item.title}
@@ -91,12 +90,11 @@ const Navbar = ({ user }) => {
             </div>
           </div>
           <div>
-            <Link
-              to="/teams"
+            <div
               className={`flex items-center justify-between  p-2 m-1  rounded-lg hover:bg-amber-200   duration-300 transition-colors ${
-                isActive("/teams")
-                  ? "bg-amber-200 text-amber-700 font-medium hover:text-amber-700"
-                  : "hover:text-neutral-800"
+                isActive('/teams')
+                  ? 'bg-amber-200 text-amber-700 font-medium hover:text-amber-700'
+                  : 'hover:text-neutral-800'
               }`}
             >
               <span className="flex items-center gap-2">
@@ -111,14 +109,14 @@ const Navbar = ({ user }) => {
                   <TeamForm user={user} />
                 </Dialog>
               </span>
-            </Link>
+            </div>
             <div>
               {user?.teams.map((item, i) => (
                 <Link to={`/team/${item._id}`} key={i}>
                   <div
                     className={`ml-9 mr-1 cursor-pointer p-1 m-auto rounded mt-1 hover:bg-purple-200 hover:text-neutral-800  transition-colors duration-300 ${
                       isActive(`/team/${item._id}`) &&
-                      "bg-purple-200  text-purple-700 font-medium hover:text-purple-700"
+                      'bg-purple-200  text-purple-700 font-medium hover:text-purple-700'
                     }`}
                   >
                     {item.title}
@@ -138,7 +136,7 @@ const Navbar = ({ user }) => {
         </div>
       </nav>
     </aside>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar

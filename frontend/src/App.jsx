@@ -1,19 +1,19 @@
-import { Routes, Route } from "react-router-dom";
-import { useSelector } from "react-redux";
-import "./App.css";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import NoMatch from "./pages/NoMatch";
-import ProjectOfId from "./pages/projectOfId";
-import Layout from "./layout/MainLayout";
-import LoginLayout from "./layout/LoginLayout";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
-import Projects from "./pages/Projects";
-import UserTasks from "./pages/UserTasks";
+import { Routes, Route } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import './App.css'
+import Home from './pages/Home'
+import Dashboard from './pages/Dashboard'
+import NoMatch from './pages/NoMatch'
+import ProjectOfId from './pages/projectOfId'
+import TeamOfId from './pages/TeamOfId'
+import Layout from './layout/MainLayout'
+import LoginLayout from './layout/LoginLayout'
+import Signup from './components/Signup'
+import Login from './components/Login'
+import UserTasks from './pages/UserTasks'
 
 function App() {
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
 
   return (
     <div>
@@ -21,8 +21,8 @@ function App() {
         {isLoggedIn ? (
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="projects" element={<Projects />} />
             <Route path="project/:id" element={<ProjectOfId />} />
+            <Route path="team/:id" element={<TeamOfId />} />
             <Route path="tasks" element={<UserTasks />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="*" element={<NoMatch />} />
@@ -35,7 +35,7 @@ function App() {
         )}
       </Routes>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

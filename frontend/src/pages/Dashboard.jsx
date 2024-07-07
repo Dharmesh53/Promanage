@@ -1,33 +1,34 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../store/authSlice";
-import axios from "axios";
-axios.defaults.withCredentials = true;
+import { useEffect, useState } from 'react'
+import useGetUser from '@/lib/useGetUser'
+import axios from 'axios'
 
-const dashboard = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [user, setUser] = useState();
+axios.defaults.withCredentials = true
 
-  const sendRequest = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/user", {
-        withCredentials: true,
-      });
-      const data = await res.data;
-      return data;
-    } catch (error) {
-      console.log(error.message);
-      dispatch(logout());
-      navigate("/");
-    }
-  };
+const Dashboard = () => {
+  const getUser = useGetUser()
+  const [user, setUser] = useState()
+
   useEffect(() => {
-    sendRequest().then((data) => setUser(data));
-  }, []);
+    getUser().then((data) => setUser(data))
+  }, [])
 
-  return <div>{user && <h1>{user.name}'s </h1>}Dashboard</div>;
-};
+  return (
+    <div className="w-full h-full flex bg-white">
+      {user && (
+        <div className="flex justify-center w-full items-center">
+          <div className="flex profile-box rounded p-28 gap-8 border border-neutral-300">
+            <div className="inline-flex justify-center items-center rounded-full bg-neutral-200 text-xl p-4">
+              {user.email.substring(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <div>{user.name}</div>
+              <div>{user.email}</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
-export default dashboard;
+export default Dashboard
