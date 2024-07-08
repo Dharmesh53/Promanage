@@ -8,3 +8,4 @@ TODO: Update the whole project overview page's add new team selection list when 
 TODO: inbox
 TODO: delete team members, delete team, delete project
 TODO: give permissions team members
+TODO: throttle the kanban
