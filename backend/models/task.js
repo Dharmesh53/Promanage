@@ -10,6 +10,10 @@ const assigneeSchema = new Schema(
     email: {
       type: String,
     },
+    team: {
+      type: Schema.Types.ObjectId,
+      default: null,
+    },
   },
   { _id: false },
 );

@@ -1,4 +1,6 @@
 const Team = require("../models/team");
+const Task = require("../models/task");
+const Project = require("../models/project");
 const User = require("../models/user");
 const mongoose = require("mongoose");
 const { emailSender } = require("../emails/newTeamMemberEmail");
@@ -136,7 +138,7 @@ const deleteUserfromTeam = async (req, res) => {
 
     return res.status(200).json({ msg: "Successfully removed that bastard" });
   } catch (error) {
-    await session.commitTransaction();
+    await session.abortTransaction();
     session.endSession();
 
     return res.status(500).json({ msg: error.message });
@@ -159,12 +161,87 @@ const changeCreator = async (req, res) => {
   }
 };
 
+// that's one hell of an code
 const deleteTeam = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { tid } = req.params;
-    console.log(tid);
+
+    const team = await Team.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(tid) } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "users",
+          foreignField: "_id",
+          as: "users",
+          pipeline: [{ $project: { email: 1, _id: 0 } }],
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          projects: 1,
+          users: { $map: { input: "$users", as: "user", in: "$$user.email" } },
+        },
+      },
+    ]).session(session);
+
+    //team always will be the size of 1
+    const assignee = {
+      name: "Not Assigned",
+      email: "---",
+      team: null,
+    };
+
+    for (const projectId of team[0].projects) {
+      const project = await Project.findById(
+        projectId,
+        { tasks: 1 },
+        { session },
+      );
+
+      if (project) {
+        await Promise.all(
+          project.tasks.map(async (taskId) => {
+            const task = await Task.findById(taskId);
+
+            if (String(task.assignee.team) == tid) {
+              await User.findOneAndUpdate(
+                { email: task.assignee.email },
+                {
+                  $pull: { tasks: task._id },
+                },
+                { session },
+              );
+              task.assignee = { ...assignee };
+              await task.save({ session });
+            }
+          }),
+        );
+      }
+    }
+
+    for (const emails of team[0].users) {
+      await User.findOneAndUpdate(
+        { email: emails },
+        {
+          $pull: { teams: tid },
+        },
+        { session },
+      );
+    }
+
+    await Team.findByIdAndDelete(tid, { session });
+
+    await session.commitTransaction();
+
     return res.status(200).json({ msg: "done" });
   } catch (error) {
+    await session.abortTransaction();
+
     return res.status(500).json({ msg: error.message });
   }
 };

@@ -5,48 +5,48 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import axios from "axios";
-import { useState } from "react";
-import { FiPlus } from "react-icons/fi";
-import { Button } from "./button";
-import { format } from "date-fns";
-import { SlCalender } from "react-icons/sl";
-import { Calendar } from "@/components/ui/calendar";
-import { motion } from "framer-motion";
-import { Input } from "./input";
-import { Label } from "./label";
-import { useSelector } from "react-redux";
-import { useToast } from "./use-toast";
-import { useEffect } from "react";
+} from '@/components/ui/popover'
+import axios from 'axios'
+import { useState } from 'react'
+import { FiPlus } from 'react-icons/fi'
+import { Button } from './button'
+import { format } from 'date-fns'
+import { SlCalender } from 'react-icons/sl'
+import { Calendar } from '@/components/ui/calendar'
+import { motion } from 'framer-motion'
+import { Input } from './input'
+import { Label } from './label'
+import { useSelector } from 'react-redux'
+import { useToast } from './use-toast'
+import { useEffect } from 'react'
 
 const AddCard = ({ column, setCards, userBoard }) => {
-  const [text, setText] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [priority, setPriority] = useState("");
-  const [assignee, setAssignee] = useState("");
-  const [clicked, setClicked] = useState(false);
-  const [assigneList, setAssigneeList] = useState([]);
-  const { toast } = useToast();
+  const [text, setText] = useState('')
+  const [date, setDate] = useState(new Date())
+  const [priority, setPriority] = useState('')
+  const [assignee, setAssignee] = useState('')
+  const [clicked, setClicked] = useState(false)
+  const [assigneList, setAssigneeList] = useState([])
+  const { toast } = useToast()
 
-  const teams = useSelector((state) => state.project?.project?.project?.teams);
-  const user = useSelector((state) => state.auth.user);
+  const teams = useSelector((state) => state.project?.project?.project?.teams)
+  const user = useSelector((state) => state.auth.user)
 
-  let id = "";
+  let id = ''
   if (!userBoard) {
-    id = useSelector((state) => state.project?.project?.project?._id);
+    id = useSelector((state) => state.project?.project?.project?._id)
   }
 
   useEffect(() => {
@@ -55,35 +55,39 @@ const AddCard = ({ column, setCards, userBoard }) => {
         return {
           name: user.name,
           email: user.email,
-        };
+          team: team._id,
+        }
       })
-    );
+    )
+    //
     //wowowwowowowwww....
     setAssigneeList(
       [...new Set(nestedList?.flat().map((obj) => JSON.stringify(obj)))].map(
         (str) => JSON.parse(str)
       )
-    );
-  }, [teams]);
+    )
+  }, [teams])
 
   const handleSubmit = async (e) => {
     try {
-      e.preventDefault();
-      setClicked((prev) => !prev);
+      e.preventDefault()
+      setClicked((prev) => !prev)
 
-      if (!text.trim().length) return;
-      let assigneeObject = { name: user.name, email: user.email };
+      if (!text.trim().length) return
+
+      let assigneeObject = { name: user.name, email: user.email }
+
       if (!userBoard) {
-        for (let i = 0; i < assigneList.length; i++) {
-          if (assigneList[i].email == assignee) {
-            assigneeObject = {
-              name: assigneList[i].name,
-              email: assigneList[i].email,
-            };
-            break;
+        const selectedAssignee = assigneList.find((a) => a.email === assignee)
+        if (selectedAssignee) {
+          assigneeObject = {
+            name: selectedAssignee.name,
+            email: selectedAssignee.email,
+            team: selectedAssignee.team,
           }
         }
       }
+
       const newCard = {
         status: column,
         title: text.trim(),
@@ -91,28 +95,30 @@ const AddCard = ({ column, setCards, userBoard }) => {
         priority,
         due: date,
         createdBy: user.email,
-      };
+      }
+
       const res = await axios.post(
         `http://localhost:5000/api/project/createTask?id=${id}`,
         newCard
-      );
-      if (res.status == 200) {
+      )
+
+      if (res.status === 200) {
         toast({
-          title: "Done!!",
-          description: "Succesfully created task",
-        });
-        setCards((pv) => [...pv, res.data.task]);
+          title: 'Done!!',
+          description: 'Succesfully created task',
+        })
+        setCards((pv) => [...pv, res.data.task])
       }
-      setClicked((prev) => !prev);
+
+      setClicked((prev) => !prev)
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
-      });
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'There was a problem with your request.',
+      })
     }
-  };
-
+  }
   return (
     <Dialog>
       <DialogTrigger>
@@ -149,7 +155,7 @@ const AddCard = ({ column, setCards, userBoard }) => {
                         <SelectItem key={i} value={al.email}>
                           {al.email}
                         </SelectItem>
-                      );
+                      )
                     })}
                   </SelectContent>
                 </Select>
@@ -159,13 +165,13 @@ const AddCard = ({ column, setCards, userBoard }) => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant={"outline"}
+                  variant={'outline'}
                   className={`
                     "justify-start text-left font-normal",
-                    ${!date && "text-muted-foreground"}`}
+                    ${!date && 'text-muted-foreground'}`}
                 >
                   <SlCalender className="mr-2 size-4" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  {date ? format(date, 'PPP') : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent>
@@ -191,7 +197,7 @@ const AddCard = ({ column, setCards, userBoard }) => {
             <Button
               onClick={handleSubmit}
               disabled={clicked}
-              className={`${clicked && "bg-gray-400 cursor-progress"}`}
+              className={`${clicked && 'bg-gray-400 cursor-progress'}`}
             >
               Create Task
             </Button>
@@ -199,7 +205,7 @@ const AddCard = ({ column, setCards, userBoard }) => {
         </DialogHeader>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default AddCard;
+export default AddCard

@@ -7,24 +7,51 @@ const { ObjectId } = require("mongoose").Types;
 const { taskEmailSender } = require("../emails/newAssignedTaskEmail");
 const { userEmailSender } = require("../emails/newProjectTeamEmail");
 const Cache = require("../utils/Cache");
+const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const createProject = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { title, teamId, createdBy } = req.body;
+
     const project = new Project({
       title,
       teams: [teamId],
       createdBy,
     });
-    await project.save();
-    const team = await Team.findById(teamId);
 
-    team?.users.forEach(async (user) => {
-      await User.findByIdAndUpdate(user, { $push: { projects: project._id } });
-    });
+    await project.save({ session });
+
+    const team = await Team.findByIdAndUpdate(
+      teamId,
+      {
+        $push: { projects: project._id },
+      },
+      { new: true, session },
+    );
+
+    await Promise.all(
+      team?.users.map((user) =>
+        User.findByIdAndUpdate(
+          user,
+          {
+            $push: { projects: project._id },
+          },
+          { session },
+        ),
+      ),
+    );
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(201).json({ msg: "done" });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     return res.status(500).json({ msg: error.message });
   }
 };
@@ -278,11 +305,75 @@ const updateProjectFiles = async (req, res) => {
   }
 };
 
-exports.createProject = createProject;
-exports.getProject = getProject;
-exports.updateProject = updateProject;
-exports.createProjectTask = createProjectTask;
-exports.updateProjectTask = updateProjectTask;
-exports.addNewTeam = addNewTeam;
-exports.deleteProjectTeam = deleteProjectTeam;
-exports.updateProjectFiles = updateProjectFiles;
+const deleteProject = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  const s3Client = new S3Client({
+    region: process.env.AWS_BUCKET_REGION,
+
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECERT_ACCESS_KEY,
+    },
+  });
+
+  try {
+    const { id } = req.params;
+
+    const project = await Project.findById(id).session(session);
+
+    for (const taskId of project.tasks) {
+      const task = await Task.findById(taskId).session(session);
+
+      if (task && task.assignee) {
+        await User.findOneAndUpdate(
+          { email: task.assignee.email },
+          {
+            $pull: { tasks: taskId, projects: id },
+          },
+          { session },
+        );
+      }
+
+      await Task.findByIdAndDelete(taskId, { session });
+    }
+
+    for (const teamId of project.teams) {
+      await Team.findByIdAndUpdate(
+        teamId,
+        {
+          $pull: { projects: id },
+        },
+        { session },
+      );
+    }
+
+    const command = new DeleteObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: `/${String(id)}`,
+    });
+
+    await s3Client.send(command);
+
+    await Project.findByIdAndDelete(id).session(session);
+
+    session.commitTransaction();
+    return res.status(200).json({ msg: "done" });
+  } catch (error) {
+    session.abortTransaction();
+    return res.status(500).json({ msg: error.message });
+  }
+};
+
+module.exports = {
+  createProject,
+  getProject,
+  updateProject,
+  createProjectTask,
+  updateProjectTask,
+  addNewTeam,
+  deleteProjectTeam,
+  updateProjectFiles,
+  deleteProject,
+};

@@ -1,27 +1,28 @@
-import { CgRemoveR } from "react-icons/cg";
-import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { FaCheck } from "react-icons/fa6";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
-import { useSelector } from "react-redux";
-import { motion } from "framer-motion";
-import { useToast } from "@/components/ui/use-toast";
-import { Separator } from "@/components/ui/separator";
+import { CgRemoveR } from 'react-icons/cg'
+import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Input } from './ui/input'
+import { Textarea } from './ui/textarea'
+import { FaCheck } from 'react-icons/fa6'
+import { Label } from './ui/label'
+import { Button } from './ui/button'
+import { useSelector } from 'react-redux'
+import { motion } from 'framer-motion'
+import { useToast } from '@/components/ui/use-toast'
+import { Separator } from '@/components/ui/separator'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from '@/components/ui/collapsible'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -31,36 +32,39 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { AnimatePresence } from "framer-motion";
-import axios from "axios";
-import { useEffect } from "react";
+} from '@/components/ui/alert-dialog'
+import { AnimatePresence } from 'framer-motion'
+import axios from 'axios'
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const ProjectDetails = () => {
-  const { toast } = useToast();
-
-  const project = useSelector((state) => state.project?.project?.project);
-  const teams = useSelector((state) => state.auth?.user?.teams);
-  const user = useSelector((state) => state.auth?.user);
-  const [title, setTitle] = useState(project?.title);
-  const [description, setDescription] = useState(project?.description);
-  const [progess, setprogess] = useState(project?.progess);
-  const [newTeam, setNewTeam] = useState("Select new team");
-  const [totalMembers, setTotalMembers] = useState(0);
+  const { toast } = useToast()
+  const navigate = useNavigate()
+  const project = useSelector((state) => state.project?.project?.project)
+  const teams = useSelector((state) => state.auth?.user?.teams)
+  const user = useSelector((state) => state.auth?.user)
+  const [title, setTitle] = useState(project?.title)
+  const [description, setDescription] = useState(project?.description)
+  const [progess, setprogess] = useState(project?.progess)
+  const [newTeam, setNewTeam] = useState('Select new team')
+  const [totalMembers, setTotalMembers] = useState(0)
+  const [loading, setLoading] = useState(null)
 
   useEffect(() => {
-    let membersCount = 0;
+    let membersCount = 0
     project?.teams.forEach((team) => {
-      membersCount += team.users.length;
-    });
-    setTitle(project?.title);
-    setDescription(project?.description);
-    setprogess(project?.progess);
-    setTotalMembers(membersCount);
-  }, [project]);
+      membersCount += team.users.length
+    })
+    setTitle(project?.title)
+    setDescription(project?.description)
+    setprogess(project?.progess)
+    setTotalMembers(membersCount)
+  }, [project])
 
   const handleUpdate = async (e) => {
-    e.preventDefault();
+    setLoading('update')
+    e.preventDefault()
     await axios.put(
       `http://localhost:5000/api/project/updateProject/${project._id}`,
       {
@@ -68,51 +72,74 @@ const ProjectDetails = () => {
         description,
         progess,
       }
-    );
-  };
+    )
+    setLoading(null)
+  }
 
   const handleAddTeam = async () => {
-    if (newTeam === "Select new team") {
-      toast({
-        variant: "destructive",
-        className: "bg-red-400 p-2",
-        title: "Please select a team",
-      });
-      return;
-    }
-    let teamId = null;
-    teams.forEach((team) => {
-      if (team.title === newTeam) {
-        teamId = team._id;
-      }
-    });
+    setLoading('addTeam')
     try {
+      if (newTeam === 'Select new team') {
+        toast({
+          variant: 'destructive',
+          className: 'bg-red-400 p-2',
+          title: 'Please select a team',
+        })
+        return
+      }
+      let teamId = null
+
+      teams.forEach((team) => {
+        if (team.title === newTeam) {
+          teamId = team._id
+        }
+      })
+
       await axios.post(
         `http://localhost:5000/api/project/addTeam/${project._id}`,
         { teamId }
-      );
+      )
     } catch (error) {
       toast({
-        variant: "destructive",
-        className: "bg-red-400 p-2",
+        variant: 'destructive',
+        className: 'bg-red-400 p-2',
         title: error.response.data.msg,
-      });
+      })
+    } finally {
+      setLoading(null)
     }
-  };
+  }
 
   const handleRemoveTeam = async (teamId, code) => {
+    setLoading(`removeTeam-${teamId}-${code}`)
     try {
       await axios.delete(
         `http://localhost:5000/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
-      );
+      )
     } catch (error) {
       toast({
-        variant: "destructive",
-        className: "bg-red-400 p-2",
-        title: error.response.data.msg || "error",
-      });
+        variant: 'destructive',
+        className: 'bg-red-400 p-2',
+        title: error.response.data.msg || 'error',
+      })
+    } finally {
+      setLoading(null)
     }
-  };
+  }
+
+  const handleDeleteProject = async () => {
+    try {
+      setLoading('deleteProject')
+      await axios.delete(
+        `http://localhost:5000/api/project/delete/${project._id}`
+      )
+    } catch (error) {
+      console.log(error.message)
+    } finally {
+      navigate('/')
+      setLoading(null)
+    }
+  }
 
   return (
     <div>
@@ -121,13 +148,13 @@ const ProjectDetails = () => {
           <span className="font-semibold text-2xl">{project?.title}</span>
           {progess?.progess != undefined && (
             <span
-              className={`text-sm ml-2  border rounded-full px-2 ${
-                progess === "At risk"
-                  ? "bg-orange-200 border-orange-600"
-                  : progess === "Off track"
-                  ? "bg-yellow-200 border-yellow-600"
-                  : "bg-teal-200 border-teal-600"
-              } `}
+              className={`text-sm ml-2 border rounded-full px-2 ${
+                progess === 'At risk'
+                  ? 'bg-orange-200 border-orange-600'
+                  : progess === 'Off track'
+                    ? 'bg-yellow-200 border-yellow-600'
+                    : 'bg-teal-200 border-teal-600'
+              }`}
             >
               {project?.progess}
             </span>
@@ -138,20 +165,17 @@ const ProjectDetails = () => {
           {project?.teams.map((team) =>
             team.users.slice(0, 4).map((user, i) => {
               return (
-                <Avatar
-                  className={`border-4 border-white z-[50] -ml-3 `}
-                  key={i}
-                >
+                <Avatar className="border-4 border-white z-[50] -ml-3" key={i}>
                   <AvatarImage src="\" />
                   <AvatarFallback className="bg-[#94dbba]">
                     {user.email.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-              );
+              )
             })
           )}
           {totalMembers - 4 > 0 && (
-            <Avatar className="border-4 border-white z-0 -ml-3 ">
+            <Avatar className="border-4 border-white z-0 -ml-3">
               <AvatarImage src="\" />
               <AvatarFallback className="bg-[#94dbba]">
                 +{totalMembers - 4}
@@ -160,23 +184,23 @@ const ProjectDetails = () => {
           )}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4 mt-4">
+      <div className="grid min-[1000px]:grid-cols-2 max-[1000px]:grid-cols-1 gap-4 mt-4">
         <div className="border grid rounded-lg border-neutral-400 border-dashed p-4">
           <div className="flex w-full gap-4">
             <div className="w-1/2">
-              <Label htmlFor="title" className="text-md ">
+              <Label htmlFor="title" className="text-md">
                 Title
               </Label>
               <Input
                 name="title"
-                className="mb-2 "
+                className="mb-2"
                 value={title}
                 disabled={user?.email !== project?.createdBy}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
             <div className="w-1/2">
-              <Label htmlFor="status" className="text-md ">
+              <Label htmlFor="status" className="text-md">
                 Progress
               </Label>
               <Select
@@ -200,15 +224,22 @@ const ProjectDetails = () => {
           </Label>
           <Textarea
             name="description"
-            className="h-[30rem] "
+            className="h-[30rem]"
             value={description}
             disabled={user?.email !== project?.createdBy}
             placeholder="Describe your project"
             onChange={(e) => setDescription(e.target.value)}
           />
           {user?.email === project?.createdBy && (
-            <Button className="w-1/4 mx-auto my-4" onClick={handleUpdate}>
-              Update
+            <Button
+              className="w-1/4 mx-auto my-4"
+              onClick={handleUpdate}
+              disabled={loading === 'update'}
+            >
+              {loading === `update` && (
+                <Loader2 className="animate-spin pr-2" />
+              )}
+              {loading === 'update' ? 'Updating...' : 'Update'}
             </Button>
           )}
         </div>
@@ -229,8 +260,16 @@ const ProjectDetails = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button className="p-2" onClick={handleAddTeam}>
-                  <FaCheck size={17} />
+                <Button
+                  className="p-2"
+                  onClick={handleAddTeam}
+                  disabled={loading === 'addTeam'}
+                >
+                  {loading === 'addTeam' ? (
+                    <Loader2 className="animate-spin pr-2" />
+                  ) : (
+                    <FaCheck size={17} />
+                  )}
                 </Button>
               </div>
             </>
@@ -245,7 +284,11 @@ const ProjectDetails = () => {
                   <span>
                     <AlertDialog>
                       <AlertDialogTrigger>
-                        <Button className="text-red-400" variant="link">
+                        <Button
+                          className="text-red-400"
+                          variant="link"
+                          disabled={loading?.startsWith('removeTeam')}
+                        >
                           <CgRemoveR />
                         </Button>
                       </AlertDialogTrigger>
@@ -257,15 +300,25 @@ const ProjectDetails = () => {
                           <AlertDialogDescription className="flex w-full flex-col gap-3">
                             <Button
                               onClick={() => handleRemoveTeam(team._id, 1)}
+                              disabled={loading?.startsWith('removeTeam')}
                             >
-                              Delete Team and delete task assigned to team
-                              members
+                              {loading === `removeTeam-${team._id}-1` && (
+                                <Loader2 className="animate-spin pr-2" />
+                              )}
+                              {loading === `removeTeam-${team._id}-1`
+                                ? 'Deleting...'
+                                : 'Delete Team and delete task assigned to team members'}
                             </Button>
                             <Button
                               onClick={() => handleRemoveTeam(team._id, 2)}
+                              disabled={loading?.startsWith('removeTeam')}
                             >
-                              Delete Team and remove the assignee's of those
-                              task
+                              {loading === `removeTeam-${team._id}-2` && (
+                                <Loader2 className="animate-spin pr-2" />
+                              )}
+                              {loading === `removeTeam-${team._id}-2`
+                                ? 'Deleting...'
+                                : "Delete Team and remove the assignee's of those tasks"}
                             </Button>
                           </AlertDialogDescription>
                         </AlertDialogHeader>
@@ -288,12 +341,12 @@ const ProjectDetails = () => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2, delay: i * 0.15 }}
-                      className="p-2 bg-gray-100/70 my-1 rounded"
+                      className="p-2 bg-gray-100/70 my-1 rounded flex items-center"
                     >
-                      <span className="p-1 border border-black mr-3 text-sm rounded-full bg-gray-200">
+                      <span className="inline-flex items-center justify-center size-8 mr-3 text-sm font-medium border border-gray-700 rounded-full bg-gray-200 flex-shrink-0">
                         {user.email.slice(0, 2).toUpperCase()}
                       </span>
-                      {user.email}
+                      <span className="truncate">{user.email}</span>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -302,8 +355,46 @@ const ProjectDetails = () => {
           ))}
         </div>
       </div>
+      {user?.email !== project?.createdBy && (
+        <div className="flex w-full justify-end">
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <Button
+                className="mt-3 bg-red-600"
+                variant="destructive"
+                disabled={loading === 'deleteProject'}
+              >
+                {loading === 'deleteProject' ? 'Deleting...' : 'Delete Project'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="font-pops">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  this project and remove your data related to this project.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Button
+                  className="bg-red-600"
+                  onClick={handleDeleteProject}
+                  variant="destructive"
+                  disabled={loading === 'deleteProject'}
+                >
+                  {loading === 'deleteProject' && (
+                    <Loader2 className="animate-spin mr-2" />
+                  )}
+                  Continue
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default ProjectDetails;
+export default ProjectDetails

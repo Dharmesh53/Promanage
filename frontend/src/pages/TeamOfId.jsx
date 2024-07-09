@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { MdDeleteOutline } from 'react-icons/md'
-import { MdOutlinePersonRemove } from 'react-icons/md'
+import { MdDeleteOutline, MdOutlinePersonRemove } from 'react-icons/md'
+import { AiOutlineLoading } from 'react-icons/ai'
 import { useToast } from '@/components/ui/use-toast'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
@@ -36,6 +36,7 @@ const TeamOfId = () => {
   const [selectedNewInCharge, setSelectedNewInCharge] = useState('')
   const [newMemberEmails, setNewMemberEmails] = useState([])
   const [input, setInput] = useState('')
+  const [loadingAction, setLoadingAction] = useState(null)
 
   useEffect(() => {
     const fetcher = async () => {
@@ -57,9 +58,10 @@ const TeamOfId = () => {
       }
     }
     fetcher()
-  }, [id, user, navigate, toast])
+  }, [id])
 
   const handleAddMember = async () => {
+    setLoadingAction('addMembers')
     try {
       const res = await axios.put(
         `http://localhost:5000/api/team/add-members`,
@@ -85,10 +87,13 @@ const TeamOfId = () => {
         className: 'bg-red-400 p-2',
         title: error.response.data.msg,
       })
+    } finally {
+      setLoadingAction(null)
     }
   }
 
   const handleDelete = async (memberId) => {
+    setLoadingAction('removeMember')
     try {
       const res = await axios.delete(
         `http://localhost:5000/api/team/delete/${id}/${memberId}`
@@ -108,10 +113,13 @@ const TeamOfId = () => {
         className: 'bg-red-400 p-2',
         title: error.response.data.msg,
       })
+    } finally {
+      setLoadingAction(null)
     }
   }
 
   const handleSelfRemoval = async () => {
+    setLoadingAction('selfRemoval')
     try {
       await axios.post(`http://localhost:5000/api/team/change-Creator`, {
         teamId: id,
@@ -130,12 +138,29 @@ const TeamOfId = () => {
         className: 'bg-red-400 p-2',
         title: error.response.data.msg,
       })
+    } finally {
+      setLoadingAction(null)
     }
   }
 
   const handleDeleteProject = async () => {
-    await axios.delete(`http://localhost:5000/api/team/delete/${id}`)
-    console.log('deleting..')
+    setLoadingAction('deleteProject')
+    try {
+      const res = await axios.delete(
+        `http://localhost:5000/api/team/delete/${id}`
+      )
+      navigate('/')
+      console.log('deleting..')
+      console.log(res.data)
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        className: 'bg-red-400 p-2',
+        title: error.response?.data?.msg || 'An error occurred',
+      })
+    } finally {
+      setLoadingAction(null)
+    }
   }
 
   const addEmailToList = (e) => {
@@ -175,14 +200,22 @@ const TeamOfId = () => {
                     <DialogTitle>Are you absolutely sure?</DialogTitle>
                     <DialogDescription>
                       This action cannot be undone. This will permanently delete
-                      this team and remove all data from our servers.
+                      this team and remove all data and tasks assigned to team
+                      members.
                     </DialogDescription>
                     <DialogFooter className="sm:justify-end">
                       <Button
                         type="button"
                         className="bg-red-500 hover:bg-red-700"
                         onClick={() => handleDeleteProject()}
+                        disabled={loadingAction === 'deleteProject'}
                       >
+                        {loadingAction === 'deleteProject' && (
+                          <AiOutlineLoading
+                            size={20}
+                            className="animate-spin-reverse mr-2"
+                          />
+                        )}
                         Confirm
                       </Button>
                       <DialogClose asChild>
@@ -239,7 +272,14 @@ const TeamOfId = () => {
                       <Button
                         className="my-3 justify-end"
                         onClick={handleAddMember}
+                        disabled={loadingAction === 'addMembers'}
                       >
+                        {loadingAction === 'addMembers' && (
+                          <AiOutlineLoading
+                            size={20}
+                            className="animate-spin-reverse mr-2"
+                          />
+                        )}
                         Update Team
                       </Button>
                     </DialogDescription>
@@ -319,7 +359,14 @@ const TeamOfId = () => {
                               type="button"
                               className="bg-red-500 hover:bg-red-700"
                               onClick={() => handleSelfRemoval()}
+                              disabled={loadingAction === 'selfRemoval'}
                             >
+                              {loadingAction === 'selfRemoval' && (
+                                <AiOutlineLoading
+                                  size={20}
+                                  className="animate-spin-reverse mr-2"
+                                />
+                              )}
                               Confirm
                             </Button>
                             <DialogClose asChild>
@@ -360,7 +407,14 @@ const TeamOfId = () => {
                             <Button
                               className="bg-red-500"
                               onClick={() => handleDelete(member._id)}
+                              disabled={loadingAction === 'removeMember'}
                             >
+                              {loadingAction === 'removeMember' && (
+                                <AiOutlineLoading
+                                  size={20}
+                                  className="animate-spin-reverse mr-2"
+                                />
+                              )}
                               Delete
                             </Button>
                             <DialogClose asChild>

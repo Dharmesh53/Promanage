@@ -7,6 +7,7 @@ const {
   createProjectTask,
   updateProjectTask,
   updateProjectFiles,
+  deleteProject,
   deleteProjectTeam,
 } = require("../controllers/projectController");
 const verifyToken = require("../utils/verifyToken");
@@ -24,5 +25,6 @@ router.put("/updateProject/:id", updateProject);
 router.put("/newFiles/:id", updateProjectFiles);
 
 router.delete("/removeTeam/:pid/:tid", deleteProjectTeam);
+router.delete("/delete/:id", deleteProject);
 
 module.exports = router;
