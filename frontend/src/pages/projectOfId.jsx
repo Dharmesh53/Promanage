@@ -16,7 +16,7 @@ const ProjectOfId = () => {
   const [cards, setCards] = useState()
 
   const fetcher = useCallback(async () => {
-    const res = await axios.get(`http://localhost:5000/api/project/${id}`)
+    const res = await axios.get(`https://promanage-backend-i7zo.onrender.com/api/project/${id}`)
 
     const result = res.data
 

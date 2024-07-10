@@ -29,7 +29,7 @@ const Signup = () => {
         password: data.password,
       };
       const res = await axios
-        .post("http://localhost:5000/api/signup", userData)
+        .post("https://promanage-backend-i7zo.onrender.com/api/signup", userData)
         .catch((e) => console.log(e));
       const result = await res.data;
       return result;

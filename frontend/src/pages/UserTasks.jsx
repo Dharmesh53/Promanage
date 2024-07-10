@@ -7,7 +7,7 @@ const UserTasks = () => {
   const [userCards, setUserCards] = useState()
 
   const fetcher = async () => {
-    const res = await axios.get(`http://localhost:5000/api/task/`)
+    const res = await axios.get(`https://promanage-backend-i7zo.onrender.com/api/task/`)
     setUserCards(res.data.tasks)
     localStorage.setItem('userCards', JSON.stringify(res.data.tasks))
   }

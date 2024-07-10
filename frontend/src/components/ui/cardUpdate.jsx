@@ -65,7 +65,7 @@ const cardUpdate = (props) => {
         break;
       }
     }
-    await axios.put(`http://localhost:5000/api/task/updateTask/${_id}`, {
+    await axios.put(`https://promanage-backend-i7zo.onrender.com/api/task/updateTask/${_id}`, {
       title: newTitle,
       description: newDescription,
       assignee: assigneeObject,

@@ -98,7 +98,7 @@ const AddCard = ({ column, setCards, userBoard }) => {
       }
 
       const res = await axios.post(
-        `http://localhost:5000/api/project/createTask?id=${id}`,
+        `https://promanage-backend-i7zo.onrender.com/api/project/createTask?id=${id}`,
         newCard
       )
 

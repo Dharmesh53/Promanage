@@ -66,7 +66,7 @@ const ProjectDetails = () => {
     setLoading('update')
     e.preventDefault()
     await axios.put(
-      `http://localhost:5000/api/project/updateProject/${project._id}`,
+      `https://promanage-backend-i7zo.onrender.com/api/project/updateProject/${project._id}`,
       {
         title,
         description,
@@ -96,7 +96,7 @@ const ProjectDetails = () => {
       })
 
       await axios.post(
-        `http://localhost:5000/api/project/addTeam/${project._id}`,
+        `https://promanage-backend-i7zo.onrender.com/api/project/addTeam/${project._id}`,
         { teamId }
       )
     } catch (error) {
@@ -114,7 +114,7 @@ const ProjectDetails = () => {
     setLoading(`removeTeam-${teamId}-${code}`)
     try {
       await axios.delete(
-        `http://localhost:5000/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
+        `https://promanage-backend-i7zo.onrender.com/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
       )
     } catch (error) {
       toast({

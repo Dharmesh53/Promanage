@@ -41,7 +41,7 @@ const TeamOfId = () => {
   useEffect(() => {
     const fetcher = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/team/get/${id}`)
+        const res = await axios.get(`https://promanage-backend-i7zo.onrender.com/api/team/get/${id}`)
         setTeam(res.data.team[0])
 
         const isMember = res.data.team[0].members.some(
@@ -64,7 +64,7 @@ const TeamOfId = () => {
     setLoadingAction('addMembers')
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/team/add-members`,
+        `https://promanage-backend-i7zo.onrender.com/api/team/add-members`,
         {
           teamId: id,
           title: team.title,
@@ -96,7 +96,7 @@ const TeamOfId = () => {
     setLoadingAction('removeMember')
     try {
       const res = await axios.delete(
-        `http://localhost:5000/api/team/delete/${id}/${memberId}`
+        `https://promanage-backend-i7zo.onrender.com/api/team/delete/${id}/${memberId}`
       )
 
       setTeam((prev) => ({
@@ -121,7 +121,7 @@ const TeamOfId = () => {
   const handleSelfRemoval = async () => {
     setLoadingAction('selfRemoval')
     try {
-      await axios.post(`http://localhost:5000/api/team/change-Creator`, {
+      await axios.post(`https://promanage-backend-i7zo.onrender.com/api/team/change-Creator`, {
         teamId: id,
         newInCharge: selectedNewInCharge,
       })
@@ -147,7 +147,7 @@ const TeamOfId = () => {
     setLoadingAction('deleteProject')
     try {
       const res = await axios.delete(
-        `http://localhost:5000/api/team/delete/${id}`
+        `https://promanage-backend-i7zo.onrender.com/api/team/delete/${id}`
       )
       navigate('/')
       console.log('deleting..')

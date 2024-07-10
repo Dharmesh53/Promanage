@@ -9,7 +9,7 @@ const getUser = () => {
 
   const sendRequest = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/user", {
+      const res = await axios.get("https://promanage-backend-i7zo.onrender.com/api/user", {
         withCredentials: true,
       });
       const data = await res.data;

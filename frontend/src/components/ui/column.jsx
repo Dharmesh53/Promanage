@@ -26,7 +26,7 @@ const Column = ({
       debounce(async (newCards) => {
         try {
           await axios.put(
-            `http://localhost:5000/api/project/updateTask/${id}`,
+            `https://promanage-backend-i7zo.onrender.com/api/project/updateTask/${id}`,
             newCards
           )
         } catch (error) {

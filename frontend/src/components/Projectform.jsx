@@ -42,7 +42,7 @@ const Projectform = ({ teams }) => {
       }
       const { id: teamId } = selectedTeam;
       const result = await axios.post(
-        "http://localhost:5000/api/project/create",
+        "https://promanage-backend-i7zo.onrender.com/api/project/create",
         {
           title,
           teamId,
