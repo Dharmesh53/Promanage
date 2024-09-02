@@ -16,6 +16,7 @@ const Column = ({
   setCards,
   userBoard,
 }) => {
+
   const [active, setActive] = useState(false)
   const project = useSelector((state) => state.project?.project?.project)
   const user = useSelector((state) => state.auth?.user)
@@ -25,10 +26,12 @@ const Column = ({
     () =>
       debounce(async (newCards) => {
         try {
-          await axios.put(
-            `https://promanage-backend-i7zo.onrender.com/api/project/updateTask/${id}`,
-            newCards
-          )
+          if (id != undefined) {
+            await axios.put(`/api/project/updateTask/${id}`, newCards)
+          } else {
+            await axios.put(`/api/user/updateTask`, newCards)
+          }
+
         } catch (error) {
           console.log(error.message)
         }
@@ -136,6 +139,7 @@ const Column = ({
     },
     [clearHighlights, getIndicators]
   )
+
   const handleDragLeave = () => {
     clearHighlights()
     setActive(false)
@@ -155,9 +159,8 @@ const Column = ({
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`h-full w-full rounded p-2 pt-12 flex flex-col overflow-y-scroll transition-colors ${
-          active ? 'bg-neutral-200/40' : 'bg-neutral-50'
-        }`}
+        className={`h-full w-full rounded p-2 pt-12 flex flex-col overflow-y-scroll transition-colors ${active ? 'bg-neutral-200/40' : 'bg-neutral-50'
+          }`}
       >
         {filteredCards.map((c) => {
           return (
@@ -171,7 +174,7 @@ const Column = ({
           )
         })}
         <DropIndicator beforeId={null} column={column} />
-        {user?.email === project?.createdBy && (
+        {(project == undefined || user?.email === project?.createdBy) && (
           <AddCard column={column} setCards={setCards} userBoard={userBoard} />
         )}
       </div>

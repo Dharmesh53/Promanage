@@ -44,7 +44,7 @@ const AddCard = ({ column, setCards, userBoard }) => {
   const teams = useSelector((state) => state.project?.project?.project?.teams)
   const user = useSelector((state) => state.auth.user)
 
-  let id = ''
+  let id = 'nope'
   if (!userBoard) {
     id = useSelector((state) => state.project?.project?.project?._id)
   }
@@ -97,10 +97,7 @@ const AddCard = ({ column, setCards, userBoard }) => {
         createdBy: user.email,
       }
 
-      const res = await axios.post(
-        `https://promanage-backend-i7zo.onrender.com/api/project/createTask?id=${id}`,
-        newCard
-      )
+      const res = await axios.post(`/api/project/createTask?id=${id}`, newCard)
 
       if (res.status === 200) {
         toast({

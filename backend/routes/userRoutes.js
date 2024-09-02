@@ -1,11 +1,11 @@
 const express = require("express");
 const {
-  signup,
-  login,
-  getUser,
-  logout,
-  getUserTeams,
-  updateUserTasks,
+    signup,
+    login,
+    getUser,
+    logout,
+    getUserTeams,
+    updateUserTasks,
 } = require("../controllers/userController");
 const verifyToken = require("../utils/verifyToken");
 

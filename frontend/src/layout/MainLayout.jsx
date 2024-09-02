@@ -30,7 +30,7 @@ const Layout = () => {
   const getUser = useGetUser()
 
   const sendReq = async () => {
-    const res = await axios.post('https://promanage-backend-i7zo.onrender.com/api/logout', null, {
+    const res = await axios.post('/api/logout', null, {
       withCredentials: true,
     })
     if (res.status == 200) {
@@ -56,7 +56,7 @@ const Layout = () => {
 
   return (
     <div className="flex flex-col h-screen font-pops ">
-      <div className="flex justify-between border-b bg-white">
+      <div className="flex justify-between border-b h-[4%] bg-white">
         <Button
           variant="ghost"
           onClick={() => {
@@ -91,18 +91,13 @@ const Layout = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="flex overflow-auto">
+      <div className="flex h-[96%] overflow-auto">
         <div
-          className={`transition-all  ${
-            toggle
-              ? 'min-[800px]:w-[20%] max-w-64 opacity-100 translate-x-0 max-[800px]:w-[25%]'
-              : 'w-0 opacity-0 -translate-x-full '
-          }
-          `}
+          className={`transition-all bg-zinc-800 flex-grow-0 h-full ${toggle ? 'min-[800px]:w-[20%] max-w-64 opacity-100 translate-x-0 max-[800px]:w-[25%]' : 'w-0 opacity-0 -translate-x-full'}`}
         >
           <Navbar user={user} />
         </div>
-        <div className="w-full overflow-hidden">
+        <div className="flex-grow w-full overflow-hidden">
           <Outlet />
         </div>
         <Toaster />

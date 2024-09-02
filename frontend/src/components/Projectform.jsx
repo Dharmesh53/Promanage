@@ -3,66 +3,70 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "./ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
-import { useEffect } from "react";
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from './ui/label'
+import { useToast } from '@/components/ui/use-toast'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useSelector } from 'react-redux'
+import { Loader2 } from 'lucide-react'
 
 const Projectform = ({ teams }) => {
-  const { toast } = useToast();
-  const [value, setValue] = useState(null);
-  const [title, setTitle] = useState("");
-  const [filteredTeam, setFilteredTeam] = useState([]);
-  const user = useSelector((state) => state.auth?.user);
+  const { toast } = useToast()
+  const [value, setValue] = useState(null)
+  const [title, setTitle] = useState('')
+  const [filteredTeam, setFilteredTeam] = useState([])
+  const [clicked, setClicked] = useState(false)  // State to disable the button
+  const user = useSelector((state) => state.auth?.user)
 
   useEffect(() => {
-    setFilteredTeam(
-      teams?.names?.filter((team) => team.createdBy === user.email)
-    );
-  }, [teams, user?.email]);
+    if (teams && user?.email) {  // Ensure both teams and user.email are available
+      setFilteredTeam(
+        teams?.names?.filter((team) => team.createdBy === user.email)
+      )
+    }
+  }, [teams, user?.email])
 
   const handleSubmit = async () => {
     try {
-      const selectedTeam = teams?.names?.find((team) => team.title === value);
+      setClicked(true)  // Disable the button when clicked
+      const selectedTeam = teams?.names?.find((team) => team.title === value)
       if (!selectedTeam) {
-        console.log("Selected team not found");
-        return;
+        console.log('Selected team not found')
+        setClicked(false)  // Re-enable the button if there's an issue
+        return
       }
-      const { id: teamId } = selectedTeam;
-      const result = await axios.post(
-        "https://promanage-backend-i7zo.onrender.com/api/project/create",
-        {
-          title,
-          teamId,
-          createdBy: user.email,
-        }
-      );
+      const { id: teamId } = selectedTeam
+      const result = await axios.post('/api/project/create', {
+        title,
+        teamId,
+        createdBy: user.email,
+      })
       if (result.status == 200) {
         toast({
-          title: "Done !!",
-          description: "Successfully created project",
-        });
+          title: 'Done !!',
+          description: 'Successfully created project',
+        })
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: 'Error',
         description: error.message,
-        variant: "destructive",
-      });
+        variant: 'destructive',
+      })
+    } finally {
+      setClicked(false)  // Re-enable the button after the request is handled
     }
-  };
+  }
 
   return (
     <DialogContent>
@@ -81,7 +85,7 @@ const Projectform = ({ teams }) => {
             Team
             <Select value={value} onValueChange={setValue}>
               <SelectTrigger className="mt-3">
-                <SelectValue>{value || "Select team for project"}</SelectValue>
+                <SelectValue>{value || 'Select team for project'}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {filteredTeam?.map((item, i) => (
@@ -94,11 +98,19 @@ const Projectform = ({ teams }) => {
           </Label>
         </DialogDescription>
       </DialogHeader>
-      <Button onClick={handleSubmit} className="mt-3">
-        Submit
+      <Button onClick={handleSubmit} className="mt-3 font-pops" disabled={clicked}>
+        {clicked ? (
+          <>
+            <Loader2 className="animate-spin mr-2" />
+            Creating team...
+          </>
+        ) : (
+          "Create"
+        )}
       </Button>
     </DialogContent>
-  );
-};
+  )
+}
 
-export default Projectform;
+export default Projectform
+

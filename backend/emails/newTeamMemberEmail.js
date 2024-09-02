@@ -1,7 +1,7 @@
-const nodemailer = require("nodemailer");
+const transporter = require("./transporter");
 
 function newMemberEmailTemplate(memberName, teamName) {
-  return `
+    return `
     <!doctype html>
     <html>
       <head>
@@ -49,27 +49,27 @@ function newMemberEmailTemplate(memberName, teamName) {
   `;
 }
 
-const emailSender = (memberName, teamName) => {
-  try {
-    const emailContent = newMemberEmailTemplate(memberName, teamName);
+const emailSender = (memberName, teamName, memberEmail) => {
+    try {
+        const emailContent = newMemberEmailTemplate(memberName, teamName);
 
-    const mailOptions = {
-      from: "dhiru7321r@gmail.com",
-      to: task.assignee.email,
-      subject: "Added in a new Team",
-      html: emailContent,
-    };
+        const mailOptions = {
+            from: "dhiru7321r@gmail.com",
+            to: memberEmail,
+            subject: "Added in a new Team",
+            html: emailContent,
+        };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log("Error sending email:", error);
-      } else {
-        console.log("Email sent:", info.response);
-      }
-    });
-  } catch (error) {
-    console.log(error);
-  }
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log("Error sending email:", error);
+            } else {
+                console.log("Email sent:", info.response);
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 exports.emailSender = emailSender;

@@ -1,49 +1,49 @@
-import { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { login } from "../store/authSlice";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { useState } from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { login } from '../store/authSlice'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
+import { Link } from 'react-router-dom'
 
 const Login = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [data, setData] = useState({
-    email: "",
-    password: "",
-  });
+    email: '',
+    password: '',
+  })
 
   const handleChange = (e) => {
     setData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }));
-  };
+    }))
+  }
 
   const sendReq = async () => {
     try {
       const userData = {
         email: data.email,
         password: data.password,
-      };
-      const res = await axios.post("https://promanage-backend-i7zo.onrender.com/api/login", userData);
-      const result = await res.data;
-      return result;
+      }
+      const res = await axios.post('/api/login', userData)
+      const result = await res.data
+      return result
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const user = await sendReq();
+    e.preventDefault()
+    const user = await sendReq()
     if (user) {
-      dispatch(login());
-      navigate("/");
+      dispatch(login())
+      navigate('/')
     }
-  };
+  }
 
   return (
     <div className="mt-7">
@@ -84,7 +84,7 @@ const Login = () => {
         </span>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

@@ -1,50 +1,50 @@
-import { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { login } from "../store/authSlice";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { useState } from 'react'
+import axios from 'axios'
+import { useNavigate, Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { login } from '../store/authSlice'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
 
 const Signup = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [data, setData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+    name: '',
+    email: '',
+    password: '',
+  })
 
   const handleChange = (e) => {
     setData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }));
-  };
+    }))
+  }
   const sendReq = async () => {
     try {
       const userData = {
         name: data.name,
         email: data.email,
         password: data.password,
-      };
+      }
       const res = await axios
-        .post("https://promanage-backend-i7zo.onrender.com/api/signup", userData)
-        .catch((e) => console.log(e));
-      const result = await res.data;
-      return result;
+        .post('/api/signup', userData)
+        .catch((e) => console.log(e))
+      const result = await res.data
+      return result
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
-  };
+  }
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const user = await sendReq();
+    e.preventDefault()
+    const user = await sendReq()
     if (user) {
-      dispatch(login());
-      navigate("/");
+      dispatch(login())
+      navigate('/')
     }
-  };
+  }
   return (
     <div className="mt-7">
       <div className="w-1/3 m-auto ">
@@ -95,7 +95,7 @@ const Signup = () => {
         </span>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Signup;
+export default Signup

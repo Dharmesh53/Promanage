@@ -65,14 +65,11 @@ const ProjectDetails = () => {
   const handleUpdate = async (e) => {
     setLoading('update')
     e.preventDefault()
-    await axios.put(
-      `https://promanage-backend-i7zo.onrender.com/api/project/updateProject/${project._id}`,
-      {
-        title,
-        description,
-        progess,
-      }
-    )
+    await axios.put(`/api/project/updateProject/${project._id}`, {
+      title,
+      description,
+      progess,
+    })
     setLoading(null)
   }
 
@@ -95,10 +92,7 @@ const ProjectDetails = () => {
         }
       })
 
-      await axios.post(
-        `https://promanage-backend-i7zo.onrender.com/api/project/addTeam/${project._id}`,
-        { teamId }
-      )
+      await axios.post(`/api/project/addTeam/${project._id}`, { teamId })
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -114,7 +108,7 @@ const ProjectDetails = () => {
     setLoading(`removeTeam-${teamId}-${code}`)
     try {
       await axios.delete(
-        `https://promanage-backend-i7zo.onrender.com/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
+        `/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
       )
     } catch (error) {
       toast({
@@ -131,7 +125,7 @@ const ProjectDetails = () => {
     try {
       setLoading('deleteProject')
       await axios.delete(
-        `http://localhost:5000/api/project/delete/${project._id}`
+        `/api/project/delete/${project._id}`
       )
     } catch (error) {
       console.log(error.message)
@@ -148,13 +142,12 @@ const ProjectDetails = () => {
           <span className="font-semibold text-2xl">{project?.title}</span>
           {progess?.progess != undefined && (
             <span
-              className={`text-sm ml-2 border rounded-full px-2 ${
-                progess === 'At risk'
-                  ? 'bg-orange-200 border-orange-600'
-                  : progess === 'Off track'
-                    ? 'bg-yellow-200 border-yellow-600'
-                    : 'bg-teal-200 border-teal-600'
-              }`}
+              className={`text-sm ml-2 border rounded-full px-2 ${progess === 'At risk'
+                ? 'bg-orange-200 border-orange-600'
+                : progess === 'Off track'
+                  ? 'bg-yellow-200 border-yellow-600'
+                  : 'bg-teal-200 border-teal-600'
+                }`}
             >
               {project?.progess}
             </span>
@@ -237,7 +230,7 @@ const ProjectDetails = () => {
               disabled={loading === 'update'}
             >
               {loading === `update` && (
-                <Loader2 className="animate-spin pr-2" />
+                <Loader2 className="animate-spin mr-2" />
               )}
               {loading === 'update' ? 'Updating...' : 'Update'}
             </Button>
@@ -266,7 +259,7 @@ const ProjectDetails = () => {
                   disabled={loading === 'addTeam'}
                 >
                   {loading === 'addTeam' ? (
-                    <Loader2 className="animate-spin pr-2" />
+                    <Loader2 className="animate-spin mr-2" />
                   ) : (
                     <FaCheck size={17} />
                   )}
@@ -303,7 +296,7 @@ const ProjectDetails = () => {
                               disabled={loading?.startsWith('removeTeam')}
                             >
                               {loading === `removeTeam-${team._id}-1` && (
-                                <Loader2 className="animate-spin pr-2" />
+                                <Loader2 className="animate-spin mr-2" />
                               )}
                               {loading === `removeTeam-${team._id}-1`
                                 ? 'Deleting...'
@@ -314,7 +307,7 @@ const ProjectDetails = () => {
                               disabled={loading?.startsWith('removeTeam')}
                             >
                               {loading === `removeTeam-${team._id}-2` && (
-                                <Loader2 className="animate-spin pr-2" />
+                                <Loader2 className="animate-spin mr-2" />
                               )}
                               {loading === `removeTeam-${team._id}-2`
                                 ? 'Deleting...'
@@ -355,7 +348,7 @@ const ProjectDetails = () => {
           ))}
         </div>
       </div>
-      {user?.email !== project?.createdBy && (
+      {user?.email === project?.createdBy && (
         <div className="flex w-full justify-end">
           <AlertDialog>
             <AlertDialogTrigger>
