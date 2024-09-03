@@ -9,6 +9,7 @@ import { IoIosArrowDown } from 'react-icons/io'
 import useGetUser from '@/lib/useGetUser'
 import Navbar from '@/components/Navbar'
 import { setUser } from '../store/authSlice'
+import { getWidth } from '@/lib/utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +24,7 @@ import { useEffect } from 'react'
 import { Toaster } from '@/components/ui/toaster'
 
 const Layout = () => {
-  const [toggle, setToggle] = useState(true)
+  const [toggle, setToggle] = useState(getWidth())
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -52,11 +53,19 @@ const Layout = () => {
     fetcher()
   }, [])
 
+  useEffect(() => {
+    const handleResize = () => {
+      setToggle(getWidth())
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  })
+
   const user = useSelector((state) => state.auth.user)
 
   return (
-    <div className="flex flex-col h-screen font-pops ">
-      <div className="flex justify-between border-b h-[4%] bg-white">
+    <div className="flex flex-col h-screen  font-pops ">
+      <div className="flex justify-between border-b min-h-[2rem] bg-white">
         <Button
           variant="ghost"
           onClick={() => {
@@ -91,7 +100,7 @@ const Layout = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="flex h-[96%] overflow-auto">
+      <div className="flex h-full overflow-auto">
         <div
           className={`transition-all bg-zinc-800 flex-grow-0 h-full ${toggle ? 'min-[800px]:w-[20%] max-w-64 opacity-100 translate-x-0 max-[800px]:w-[25%]' : 'w-0 opacity-0 -translate-x-full'}`}
         >

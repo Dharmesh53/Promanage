@@ -1,19 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { login } from '../store/authSlice'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
+import { Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [image, setImage] = useState('../../assets/board.png')
+  const [fade, setFade] = useState(false)
   const [data, setData] = useState({
     email: '',
     password: '',
   })
+  const [isDisabled, setIsDisabled] = useState(false)
 
   const handleChange = (e) => {
     setData((prev) => ({
@@ -21,6 +25,28 @@ const Login = () => {
       [e.target.name]: e.target.value,
     }))
   }
+
+  useEffect(() => {
+    const images = [
+      '../../assets/board.png',
+      '../../assets/canvas.png',
+      '../../assets/home.png',
+    ]
+
+    let idx = 0
+
+    const id = setInterval(() => {
+      setFade(true)
+
+      setTimeout(() => {
+        setFade(false)
+        setImage(images[idx])
+        idx = ++idx % images.length
+      }, 600)
+    }, 2200)
+
+    return () => clearInterval(id)
+  }, [])
 
   const sendReq = async () => {
     try {
@@ -38,16 +64,18 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsDisabled(true)
     const user = await sendReq()
     if (user) {
       dispatch(login())
       navigate('/')
     }
+    setIsDisabled(false)
   }
 
   return (
-    <div className="mt-7">
-      <div className="w-1/3 m-auto ">
+    <div className="w-[40%] flex h-full">
+      <div className="z-10 w-2/3 m-auto">
         <span className="flex justify-center text-2xl">Login</span>
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <label htmlFor="email">
@@ -72,9 +100,37 @@ const Login = () => {
               placeholder="Enter your password"
             />
           </label>
-          <Button className="border-2" type="submit">
-            Login
+          <Button className="border-2" type="submit" disabled={isDisabled}>
+            {isDisabled ? (
+              <span className="flex">
+                <Loader2 className="animate-spin-reverse mr-2" /> Logging in..
+              </span>
+            ) : (
+              'Login'
+            )}
           </Button>
+          <div className="flex w-full gap-2">
+            <Button
+              variant="secondary"
+              className="flex-grow"
+              onClick={() =>
+                setData({ email: 'demo1@test.com', password: 'demo1' })
+              }
+              disabled={isDisabled}
+            >
+              Use Demo account 1
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-grow"
+              onClick={() =>
+                setData({ email: 'demo2@test.com', password: 'demo2' })
+              }
+              disabled={isDisabled}
+            >
+              Use Demo account 2
+            </Button>
+          </div>
         </form>
         <span className="flex justify-center my-6 gap-2">
           Don't have an Account
@@ -83,6 +139,13 @@ const Login = () => {
           </Link>
         </span>
       </div>
+      <img
+        src={image}
+        alt="Board"
+        className={`absolute right-[-40%] top-[10%] rounded border fade-out-20 transition-opacity duration-1000 ${
+          fade ? 'opacity-35' : 'opacity-100'
+        }`}
+      />
     </div>
   )
 }

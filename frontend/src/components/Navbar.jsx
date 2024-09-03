@@ -32,10 +32,11 @@ const Navbar = ({ user }) => {
         <div className="flex flex-col gap-2">
           <Link
             to="/tasks"
-            className={`flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${isActive('/tasks')
+            className={`flex items-center gap-2 p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${
+              isActive('/tasks')
                 ? 'bg-amber-200 text-amber-700 font-medium hover:text-amber-700 '
                 : 'hover:text-neutral-800'
-              }`}
+            }`}
           >
             <GrTask size={18} />
             My Tasks
@@ -43,10 +44,11 @@ const Navbar = ({ user }) => {
 
           <div>
             <div
-              className={`flex items-center justify-between  p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${isActive('/projects')
+              className={`flex items-center justify-between  p-2 m-1 rounded-lg hover:bg-amber-200   duration-300 transition-colors ${
+                isActive('/projects')
                   ? 'bg-amber-200 text-amber-700 font-medium hover:text-amber-700'
                   : 'hover:text-neutral-800'
-                }`}
+              }`}
             >
               <span className="flex items-center gap-2">
                 <GrProjects size={18} />
@@ -65,10 +67,11 @@ const Navbar = ({ user }) => {
               {user?.projects.map((item, i) => (
                 <Link to={`/project/${item._id}`} key={i}>
                   <div
-                    className={`ml-9 mr-1 mb-2 cursor-pointer p-1 m-auto rounded hover:bg-purple-200  transition-colors duration-300 ${isActive(`/project/${item._id}`)
+                    className={`ml-9 mr-1 mb-2 cursor-pointer p-1 m-auto rounded hover:bg-purple-200  transition-colors duration-300 ${
+                      isActive(`/project/${item._id}`)
                         ? 'bg-purple-200 text-purple-700 font-medium hover:text-purple-700'
                         : 'hover:text-neutral-800'
-                      }`}
+                    }`}
                   >
                     {item.title}
                   </div>
@@ -79,10 +82,11 @@ const Navbar = ({ user }) => {
 
           <div>
             <div
-              className={`flex items-center justify-between  p-2 m-1  rounded-lg hover:bg-amber-200   duration-300 transition-colors ${isActive('/teams')
+              className={`flex items-center justify-between  p-2 m-1  rounded-lg hover:bg-amber-200   duration-300 transition-colors ${
+                isActive('/teams')
                   ? 'bg-amber-200 text-amber-700 font-medium hover:text-amber-700'
                   : 'hover:text-neutral-800'
-                }`}
+              }`}
             >
               <span className="flex items-center gap-2">
                 <RiTeamLine size={18} />
@@ -101,9 +105,10 @@ const Navbar = ({ user }) => {
               {user?.teams.map((item, i) => (
                 <Link to={`/team/${item._id}`} key={i}>
                   <div
-                    className={`ml-9 mr-1 cursor-pointer p-1 m-auto rounded mt-1 hover:bg-purple-200 hover:text-neutral-800  transition-colors duration-300 ${isActive(`/team/${item._id}`) &&
+                    className={`ml-9 mr-1 cursor-pointer p-1 m-auto rounded mt-1 hover:bg-purple-200 hover:text-neutral-800  transition-colors duration-300 ${
+                      isActive(`/team/${item._id}`) &&
                       'bg-purple-200  text-purple-700 font-medium hover:text-purple-700'
-                      }`}
+                    }`}
                   >
                     {item.title}
                   </div>
@@ -112,12 +117,11 @@ const Navbar = ({ user }) => {
             </div>
           </div>
         </div>
-
         <Button
           variant="link"
-          className="w-full h flex flex-col bg-white rounded-none"
+          className="w-full h flex flex-col bg-white rounded-none mt-6 mb-1"
         >
-          <span className="text-xs text-neutral-300">
+          <span className="text-xs text-neutral-500">
             Refresh to see changes
           </span>
           <Link

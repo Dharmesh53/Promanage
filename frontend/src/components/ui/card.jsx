@@ -1,24 +1,24 @@
-import { motion } from "framer-motion";
-import { format } from "date-fns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion } from 'framer-motion'
+import { format } from 'date-fns'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card";
+} from '@/components/ui/hover-card'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import CardUpdate from "./cardUpdate";
-import { useSelector } from "react-redux";
-import { useToast } from "./use-toast";
+} from '@/components/ui/context-menu'
+import { Sheet, SheetTrigger } from '@/components/ui/sheet'
+import CardUpdate from './cardUpdate'
+import { useSelector } from 'react-redux'
+import { useToast } from './use-toast'
 
 const Card = (props) => {
-  const { toast } = useToast();
+  const { toast } = useToast()
   const {
     _id,
     title,
@@ -33,9 +33,9 @@ const Card = (props) => {
     handleDragStart,
     createdBy,
     userBoard,
-  } = props;
+  } = props
 
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth.user)
 
   return (
     <>
@@ -50,35 +50,35 @@ const Card = (props) => {
               onDragStart={(e) => handleDragStart(e, { title, _id, column })}
               className={`cursor-grab text-sm rounded border ${
                 user?.email === createdBy
-                  ? "border-neutral-400"
-                  : "border-neutral-200"
+                  ? 'border-neutral-400'
+                  : 'border-neutral-200'
               } bg-white p-2 active:cursor-grabbing`}
             >
               <div className="flex justify-between items-center">
                 <span className="font-medium">
                   {title[0].toUpperCase() + title.slice(1)}
                 </span>
-                <span className="mr-1">
+                <span className="flex mr-1">
                   {progess && (
                     <span
-                      className={` rounded-full text-xs  px-2  border ${
-                        progess === "At risk"
-                          ? "bg-orange-200 border-orange-600"
-                          : progess === "Off track"
-                          ? "bg-yellow-200 border-yellow-600"
-                          : "bg-teal-200 border-teal-600"
+                      className={` rounded-full flex items-center justify-center text-xs px-2  border ${
+                        progess === 'At risk'
+                          ? 'bg-orange-200 border-orange-600 text-orange-800'
+                          : progess === 'Off track'
+                            ? 'bg-yellow-200 border-yellow-600 text-yellow-800'
+                            : 'bg-teal-200 border-teal-600 text-teal-800'
                       } `}
                     >
                       {progess}
                     </span>
                   )}
                   <span
-                    className={` rounded-full text-xs  px-2  border ${
-                      priority === "High"
-                        ? "bg-orange-200 border-orange-600"
-                        : priority === "Medium"
-                        ? "bg-yellow-200 border-yellow-600"
-                        : "bg-teal-200 border-teal-600"
+                    className={` rounded-full flex items-center justify-center text-xs  px-2  border ${
+                      priority === 'High'
+                        ? 'bg-orange-200 border-orange-600 text-orange-800'
+                        : priority === 'Medium'
+                          ? 'bg-yellow-200 border-yellow-600 text-yellow-800'
+                          : 'bg-teal-200 border-teal-600 text-teal-800'
                     } `}
                   >
                     {priority}
@@ -86,7 +86,7 @@ const Card = (props) => {
                 </span>
               </div>
               <div className="font-xs flex justify-between items-center mt-2 text-neutral-500">
-                <span>{format(due, "PPP")}</span>
+                <span>{format(due, 'PPP')}</span>
                 <HoverCard>
                   <HoverCardTrigger>
                     <div className="rounded-full bg-slate-200 border-1 size-6 flex items-center justify-center font-medium mr-2 cursor-default">
@@ -128,18 +128,18 @@ const Card = (props) => {
         {createdBy === user?.email && <CardUpdate {...props} />}
       </Sheet>
     </>
-  );
-};
+  )
+}
 
 const DropIndicator = ({ beforeId, column }) => {
   return (
     <div
-      data-before={beforeId || "-1"}
+      data-before={beforeId || '-1'}
       data-column={column}
       className="my-0.5 h-0.5 w-full bg-amber-400 opacity-0"
     />
-  );
-};
+  )
+}
 
-export { DropIndicator };
-export default Card;
+export { DropIndicator }
+export default Card

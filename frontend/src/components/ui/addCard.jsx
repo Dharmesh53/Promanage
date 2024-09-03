@@ -31,6 +31,7 @@ import { Label } from './label'
 import { useSelector } from 'react-redux'
 import { useToast } from './use-toast'
 import { useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 
 const AddCard = ({ column, setCards, userBoard }) => {
   const [text, setText] = useState('')
@@ -194,9 +195,9 @@ const AddCard = ({ column, setCards, userBoard }) => {
             <Button
               onClick={handleSubmit}
               disabled={clicked}
-              className={`${clicked && 'bg-gray-400 cursor-progress'}`}
+              className={`${clicked && 'bg-gray-400  cursor-progress'}`}
             >
-              Create Task
+              {clicked ? (<span className='flex'> <Loader2 className='animate-spin-reverse mr-2' /> Creating task... </span>) : "Create Task"}
             </Button>
           </DialogDescription>
         </DialogHeader>

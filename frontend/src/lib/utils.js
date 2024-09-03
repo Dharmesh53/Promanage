@@ -26,6 +26,10 @@ export function debounce(func, delay) {
   }
 }
 
+export function getWidth() {
+  return window.innerWidth > 800
+}
+
 // a more complex throttle function don't know why ??
 // .
 // export function throttle(func, delay) {

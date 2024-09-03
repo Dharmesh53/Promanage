@@ -27,9 +27,6 @@ const useTeam = (id) => {
         const isMember = teamData.members.some(
           (member) => member.email === user?.email
         )
-        if (!isMember) {
-          navigate('/error')
-        }
       } catch (error) {
         toast({
           variant: 'destructive',

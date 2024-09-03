@@ -25,11 +25,11 @@ const Projectform = ({ teams }) => {
   const [value, setValue] = useState(null)
   const [title, setTitle] = useState('')
   const [filteredTeam, setFilteredTeam] = useState([])
-  const [clicked, setClicked] = useState(false)  // State to disable the button
+  const [clicked, setClicked] = useState(false)
   const user = useSelector((state) => state.auth?.user)
 
   useEffect(() => {
-    if (teams && user?.email) {  // Ensure both teams and user.email are available
+    if (teams && user?.email) {
       setFilteredTeam(
         teams?.names?.filter((team) => team.createdBy === user.email)
       )
@@ -38,25 +38,23 @@ const Projectform = ({ teams }) => {
 
   const handleSubmit = async () => {
     try {
-      setClicked(true)  // Disable the button when clicked
+      setClicked(true)
       const selectedTeam = teams?.names?.find((team) => team.title === value)
       if (!selectedTeam) {
         console.log('Selected team not found')
-        setClicked(false)  // Re-enable the button if there's an issue
+        setClicked(false)
         return
       }
       const { id: teamId } = selectedTeam
-      const result = await axios.post('/api/project/create', {
+      await axios.post('/api/project/create', {
         title,
         teamId,
         createdBy: user.email,
       })
-      if (result.status == 200) {
-        toast({
-          title: 'Done !!',
-          description: 'Successfully created project',
-        })
-      }
+      toast({
+        title: 'Done !!',
+        description: 'Successfully created project',
+      })
     } catch (error) {
       toast({
         title: 'Error',
@@ -64,7 +62,7 @@ const Projectform = ({ teams }) => {
         variant: 'destructive',
       })
     } finally {
-      setClicked(false)  // Re-enable the button after the request is handled
+      setClicked(false)
     }
   }
 
@@ -98,14 +96,18 @@ const Projectform = ({ teams }) => {
           </Label>
         </DialogDescription>
       </DialogHeader>
-      <Button onClick={handleSubmit} className="mt-3 font-pops" disabled={clicked}>
+      <Button
+        onClick={handleSubmit}
+        className="mt-3 font-pops"
+        disabled={clicked}
+      >
         {clicked ? (
           <>
             <Loader2 className="animate-spin mr-2" />
             Creating team...
           </>
         ) : (
-          "Create"
+          'Create'
         )}
       </Button>
     </DialogContent>
@@ -113,4 +115,3 @@ const Projectform = ({ teams }) => {
 }
 
 export default Projectform
-

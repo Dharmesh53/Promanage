@@ -124,9 +124,7 @@ const ProjectDetails = () => {
   const handleDeleteProject = async () => {
     try {
       setLoading('deleteProject')
-      await axios.delete(
-        `/api/project/delete/${project._id}`
-      )
+      await axios.delete(`/api/project/delete/${project._id}`)
     } catch (error) {
       console.log(error.message)
     } finally {
@@ -137,10 +135,10 @@ const ProjectDetails = () => {
 
   return (
     <div>
-      <div className="flex justify-between">
+      <div className="flex bg-white justify-between overflow-y-auto">
         <div>
           <span className="font-semibold text-2xl">{project?.title}</span>
-          {progess?.progess != undefined && (
+          {progess?.progess !== undefined && (
             <span
               className={`text-sm ml-2 border rounded-full px-2 ${progess === 'At risk'
                 ? 'bg-orange-200 border-orange-600'
@@ -177,10 +175,11 @@ const ProjectDetails = () => {
           )}
         </div>
       </div>
-      <div className="grid min-[1000px]:grid-cols-2 max-[1000px]:grid-cols-1 gap-4 mt-4">
-        <div className="border grid rounded-lg border-neutral-400 border-dashed p-4">
-          <div className="flex w-full gap-4">
-            <div className="w-1/2">
+
+      <div className="flex bg-white flex-col md:flex-row gap-4 mt-4 overflow-y-auto">
+        <div className="border rounded-lg border-neutral-400 border-dashed p-4 flex-1">
+          <div className="flex flex-col md:flex-row w-full gap-4">
+            <div className="w-full md:w-1/2">
               <Label htmlFor="title" className="text-md">
                 Title
               </Label>
@@ -192,7 +191,7 @@ const ProjectDetails = () => {
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
-            <div className="w-1/2">
+            <div className="w-full md:w-1/2">
               <Label htmlFor="status" className="text-md">
                 Progress
               </Label>
@@ -229,14 +228,15 @@ const ProjectDetails = () => {
               onClick={handleUpdate}
               disabled={loading === 'update'}
             >
-              {loading === `update` && (
+              {loading === 'update' && (
                 <Loader2 className="animate-spin mr-2" />
               )}
               {loading === 'update' ? 'Updating...' : 'Update'}
             </Button>
           )}
         </div>
-        <div className="border rounded-lg border-neutral-400 border-dashed p-4">
+
+        <div className="border rounded-lg border-neutral-400 border-dashed p-4 flex-1">
           {user?.email === project?.createdBy ? (
             <>
               <span className="font-medium">Add new teams</span>
@@ -269,6 +269,7 @@ const ProjectDetails = () => {
           ) : (
             <span className="font-medium">Teams</span>
           )}
+
           {project?.teams.map((team, idx) => (
             <Collapsible key={idx}>
               <CollapsibleTrigger className="flex items-center justify-between w-full my-1">
@@ -348,6 +349,7 @@ const ProjectDetails = () => {
           ))}
         </div>
       </div>
+
       {user?.email === project?.createdBy && (
         <div className="flex w-full justify-end">
           <AlertDialog>
