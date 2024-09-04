@@ -11,7 +11,7 @@ const connectToDB = require("./utils/connectToDB");
 const configureRoutes = require("./server/express");
 const configureSocket = require("./server/socket");
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5834;
 const app = express();
 
 app.use(cors({ credentials: true, origin: process.env.MY_FRONTEND_URL }));
@@ -29,10 +29,8 @@ const io = new Server(server, {
 configureRoutes(app);
 configureSocket(io);
 
-connectToDB();
-
-// connectToDB().then(() => {
-//   server.listen(port, () => {
-//     console.log(`Server running on port ${port}`);
-//   });
-// });
+connectToDB().then(() => {
+    server.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
+});
