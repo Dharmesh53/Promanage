@@ -11,7 +11,7 @@ const Signup = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [fade, setFade] = useState(false)
-  const [image, setImage] = useState('../../public/board.png')
+  const [image, setImage] = useState('https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/board_zffmew.png')
   const [data, setData] = useState({
     name: '',
     email: '',
@@ -28,11 +28,10 @@ const Signup = () => {
 
   useEffect(() => {
     const images = [
-      '../../public/board.png',
-      '../../public/canvas.png',
-      '../../public/home.png',
+      'https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/board_zffmew.png',
+      'https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/canvas_gt3qhk.png',
+      'https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/home_miei3s.png',
     ]
-
     let idx = 0
 
     const id = setInterval(() => {
