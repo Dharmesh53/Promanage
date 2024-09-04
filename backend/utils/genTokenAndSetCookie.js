@@ -13,7 +13,8 @@ const genTokenAndSetCookie = (user, res) => {
     path: "/",
     expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 4),
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "None",
+    secure: process.env.NODE_ENV === "production",
   });
 };
 
