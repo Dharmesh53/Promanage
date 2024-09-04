@@ -16,7 +16,6 @@ const Column = ({
   setCards,
   userBoard,
 }) => {
-
   const [active, setActive] = useState(false)
   const project = useSelector((state) => state.project?.project?.project)
   const user = useSelector((state) => state.auth?.user)
@@ -27,11 +26,16 @@ const Column = ({
       debounce(async (newCards) => {
         try {
           if (id != undefined) {
-            await axios.put(`/api/project/updateTask/${id}`, newCards)
+            await axios.put(
+              `https://promanage-8loe.onrender.com/api/project/updateTask/${id}`,
+              newCards
+            )
           } else {
-            await axios.put(`/api/user/updateTask`, newCards)
+            await axios.put(
+              `https://promanage-8loe.onrender.com/api/user/updateTask`,
+              newCards
+            )
           }
-
         } catch (error) {
           console.log(error.message)
         }
@@ -159,8 +163,9 @@ const Column = ({
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`h-full w-full rounded p-2 pt-12 flex flex-col overflow-y-scroll transition-colors ${active ? 'bg-neutral-200/40' : 'bg-neutral-50'
-          }`}
+        className={`h-full w-full rounded p-2 pt-12 flex flex-col overflow-y-scroll transition-colors ${
+          active ? 'bg-neutral-200/40' : 'bg-neutral-50'
+        }`}
       >
         {filteredCards.map((c) => {
           return (

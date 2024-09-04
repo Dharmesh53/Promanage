@@ -98,7 +98,10 @@ const AddCard = ({ column, setCards, userBoard }) => {
         createdBy: user.email,
       }
 
-      const res = await axios.post(`/api/project/createTask?id=${id}`, newCard)
+      const res = await axios.post(
+        `https://promanage-8loe.onrender.com/api/project/createTask?id=${id}`,
+        newCard
+      )
 
       if (res.status === 200) {
         toast({
@@ -197,7 +200,15 @@ const AddCard = ({ column, setCards, userBoard }) => {
               disabled={clicked}
               className={`${clicked && 'bg-gray-400  cursor-progress'}`}
             >
-              {clicked ? (<span className='flex'> <Loader2 className='animate-spin-reverse mr-2' /> Creating task... </span>) : "Create Task"}
+              {clicked ? (
+                <span className="flex">
+                  {' '}
+                  <Loader2 className="animate-spin-reverse mr-2" /> Creating
+                  task...{' '}
+                </span>
+              ) : (
+                'Create Task'
+              )}
             </Button>
           </DialogDescription>
         </DialogHeader>

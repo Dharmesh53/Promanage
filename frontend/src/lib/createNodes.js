@@ -107,7 +107,7 @@ export const insertImage = (divRef, imgRef, id) => {
       const fileURL = URL.createObjectURL(file)
       img.src = fileURL
 
-      img.onload = async function() {
+      img.onload = async function () {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
         canvas.style.display = 'none'
@@ -124,7 +124,7 @@ export const insertImage = (divRef, imgRef, id) => {
 
         try {
           const preSignedUrl = await axios.post(
-            `/api/aws/put`,
+            `https://promanage-8loe.onrender.com/api/aws/put`,
             {
               key: `uploads/${id}/${name}`,
               contentType: webp.type,

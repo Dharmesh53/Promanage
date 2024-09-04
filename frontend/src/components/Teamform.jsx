@@ -42,11 +42,14 @@ const Teamform = ({ user }) => {
     setLoading(true)
 
     try {
-      const res = await axios.post('/api/team/create', {
-        title: title,
-        members,
-        createdBy: user.email,
-      })
+      const res = await axios.post(
+        'https://promanage-8loe.onrender.com/api/team/create',
+        {
+          title: title,
+          members,
+          createdBy: user.email,
+        }
+      )
 
       if (res.status === 200) {
         toast({
@@ -94,7 +97,10 @@ const Teamform = ({ user }) => {
           />
           <div className="flex flex-col gap-2">
             {members?.map((member, i) => (
-              <div key={i} className="flex items-center justify-between p-2 border rounded">
+              <div
+                key={i}
+                className="flex items-center justify-between p-2 border rounded"
+              >
                 <div className="flex items-center">
                   <Avatar>
                     <AvatarFallback>
@@ -113,7 +119,11 @@ const Teamform = ({ user }) => {
               </div>
             ))}
           </div>
-          <Button onClick={handleSubmit} className="my-3 flex items-center" disabled={loading}>
+          <Button
+            onClick={handleSubmit}
+            className="my-3 flex items-center"
+            disabled={loading}
+          >
             {loading && <Loader2 className="animate-spin mr-2" />}
             {loading ? 'Creating Team...' : 'Make Team'}
           </Button>
@@ -124,4 +134,3 @@ const Teamform = ({ user }) => {
 }
 
 export default Teamform
-

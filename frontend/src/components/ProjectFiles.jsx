@@ -29,10 +29,13 @@ const ProjectFiles = () => {
         const path = `uploads/${id}/${file.name}`
 
         // create preSignedUrl
-        const preSignedUrl = await axios.post('/api/aws/put', {
-          key: path,
-          contentType: file.type,
-        })
+        const preSignedUrl = await axios.post(
+          'https://promanage-8loe.onrender.com/api/aws/put',
+          {
+            key: path,
+            contentType: file.type,
+          }
+        )
 
         // upload file using that url
         await axios.put(preSignedUrl.data.url, file, {
@@ -56,7 +59,10 @@ const ProjectFiles = () => {
       }
 
       // save the file names in mongodb
-      await axios.put(`/api/project/newFiles/${id}`, result)
+      await axios.put(
+        `https://promanage-8loe.onrender.com/api/project/newFiles/${id}`,
+        result
+      )
       setUploadedFiles((prev) => [...prev, ...result])
       setFiles([])
       setDisabled(false)
@@ -71,7 +77,9 @@ const ProjectFiles = () => {
     const segments = url.split('/')
     const key = segments.slice(-3).join('/')
 
-    await axios.delete(`/api/aws/delete/${key}`)
+    await axios.delete(
+      `https://promanage-8loe.onrender.com/api/aws/delete/${key}`
+    )
 
     setUploadedFiles((prev) => prev.filter((_, i) => i != index))
   }

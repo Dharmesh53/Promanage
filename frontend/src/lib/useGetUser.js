@@ -9,9 +9,12 @@ const getUser = () => {
 
   const sendRequest = async () => {
     try {
-      const res = await axios.get('/api/user', {
-        withCredentials: true,
-      })
+      const res = await axios.get(
+        'https://promanage-8loe.onrender.com/api/user',
+        {
+          withCredentials: true,
+        }
+      )
       const data = await res.data
       return data
     } catch (error) {

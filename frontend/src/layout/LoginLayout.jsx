@@ -36,7 +36,7 @@ const Layout = () => {
         onClick={() => setExpanded((prev) => !prev)}
       >
         <span
-          className={` flex justify-center p-1 px-6  bg-white z-20 heading transition-all duration-200 ${expanded ? 'w-40 rounded-b-2xl' : 'w-full'}`}
+          className={` flex justify-center p-1 px-6  bg-white z-20 heading transition-all duration-200 ${expanded ? 'w-40 rounded-b-2xl' : 'w-full tracking-widest'}`}
         >
           Promanage
         </span>

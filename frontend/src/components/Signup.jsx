@@ -20,12 +20,14 @@ const Signup = () => {
     password: '',
   })
   const [isDisabled, setIsDisabled] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     setData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }))
+    setError('')
   }
 
   useEffect(() => {
@@ -56,11 +58,15 @@ const Signup = () => {
         email: data.email,
         password: data.password,
       }
-      const res = await axios.post('/api/signup', userData)
+      const res = await axios.post(
+        'https://promanage-8loe.onrender.com/api/signup',
+        userData
+      )
       const result = await res.data
       return result
     } catch (error) {
-      console.log(error)
+      setError('Failed to sign up. Please try again.')
+      return null
     }
   }
 
@@ -71,8 +77,9 @@ const Signup = () => {
     if (user) {
       dispatch(login())
       navigate('/')
+    } else {
+      setIsDisabled(false)
     }
-    setIsDisabled(false)
   }
 
   return (
@@ -112,6 +119,7 @@ const Signup = () => {
             placeholder="Enter your password"
           />
         </label>
+        {error && <span className="text-red-500">{error}</span>}{' '}
         <Button
           className="border-2 min-w-[22rem]"
           type="submit"

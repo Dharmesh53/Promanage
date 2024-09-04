@@ -46,11 +46,14 @@ const Projectform = ({ teams }) => {
         return
       }
       const { id: teamId } = selectedTeam
-      await axios.post('/api/project/create', {
-        title,
-        teamId,
-        createdBy: user.email,
-      })
+      await axios.post(
+        'https://promanage-8loe.onrender.com/api/project/create',
+        {
+          title,
+          teamId,
+          createdBy: user.email,
+        }
+      )
       toast({
         title: 'Done !!',
         description: 'Successfully created project',

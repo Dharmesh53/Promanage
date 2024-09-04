@@ -6,13 +6,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    proxy: {
-      '/api': {
-        target: 'https://promanage-8loe.onrender.com',
-        changeOrigin: true,
-        secure: true,
-      },
-    },
   },
   resolve: {
     alias: {

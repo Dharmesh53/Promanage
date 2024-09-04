@@ -24,7 +24,9 @@ const ImageNode = (props) => {
     const segments = props?.data?.imageSrc.split('/')
     const key = segments.slice(-3).join('/')
 
-    await axios.delete(`/api/aws/delete/${key}`)
+    await axios.delete(
+      `https://promanage-8loe.onrender.com/api/aws/delete/${key}`
+    )
     socket.emit('deleteNode:client', data, projectId, (response) => {
       console.log(response)
     })

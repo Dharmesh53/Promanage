@@ -65,11 +65,14 @@ const ProjectDetails = () => {
   const handleUpdate = async (e) => {
     setLoading('update')
     e.preventDefault()
-    await axios.put(`/api/project/updateProject/${project._id}`, {
-      title,
-      description,
-      progess,
-    })
+    await axios.put(
+      `https://promanage-8loe.onrender.com/api/project/updateProject/${project._id}`,
+      {
+        title,
+        description,
+        progess,
+      }
+    )
     setLoading(null)
   }
 
@@ -92,7 +95,10 @@ const ProjectDetails = () => {
         }
       })
 
-      await axios.post(`/api/project/addTeam/${project._id}`, { teamId })
+      await axios.post(
+        `https://promanage-8loe.onrender.com/api/project/addTeam/${project._id}`,
+        { teamId }
+      )
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -108,7 +114,7 @@ const ProjectDetails = () => {
     setLoading(`removeTeam-${teamId}-${code}`)
     try {
       await axios.delete(
-        `/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
+        `https://promanage-8loe.onrender.com/api/project/removeTeam/${project._id}/${teamId}?code=${code}`
       )
     } catch (error) {
       toast({
@@ -124,7 +130,9 @@ const ProjectDetails = () => {
   const handleDeleteProject = async () => {
     try {
       setLoading('deleteProject')
-      await axios.delete(`/api/project/delete/${project._id}`)
+      await axios.delete(
+        `https://promanage-8loe.onrender.com/api/project/delete/${project._id}`
+      )
     } catch (error) {
       console.log(error.message)
     } finally {
@@ -140,12 +148,13 @@ const ProjectDetails = () => {
           <span className="font-semibold text-2xl">{project?.title}</span>
           {progess?.progess !== undefined && (
             <span
-              className={`text-sm ml-2 border rounded-full px-2 ${progess === 'At risk'
-                ? 'bg-orange-200 border-orange-600'
-                : progess === 'Off track'
-                  ? 'bg-yellow-200 border-yellow-600'
-                  : 'bg-teal-200 border-teal-600'
-                }`}
+              className={`text-sm ml-2 border rounded-full px-2 ${
+                progess === 'At risk'
+                  ? 'bg-orange-200 border-orange-600'
+                  : progess === 'Off track'
+                    ? 'bg-yellow-200 border-yellow-600'
+                    : 'bg-teal-200 border-teal-600'
+              }`}
             >
               {project?.progess}
             </span>

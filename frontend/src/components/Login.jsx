@@ -7,23 +7,23 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useToast } from '@/components/ui/use-toast'
 
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { toast } = useToast()
   const [data, setData] = useState({
     email: '',
     password: '',
   })
   const [isDisabled, setIsDisabled] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     setData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }))
+    setError('')
   }
 
   const sendReq = async () => {
@@ -32,11 +32,15 @@ const Login = () => {
         email: data.email,
         password: data.password,
       }
-      const res = await axios.post('/api/login', userData)
+      const res = await axios.post(
+        'https://promanage-8loe.onrender.com/api/login',
+        userData
+      )
       const result = await res.data
       return result
     } catch (error) {
-      console.log(error)
+      setError('Failed to log in. Please try again.')
+      return null
     }
   }
 
@@ -48,13 +52,8 @@ const Login = () => {
       dispatch(login())
       navigate('/')
     } else {
-      toast({
-        variant: 'destructive',
-        className: 'bg-red-400 p-2',
-        title: 'Sonething went wrong!! Try again',
-      })
+      setIsDisabled(false)
     }
-    setIsDisabled(false)
   }
 
   return (
@@ -83,6 +82,7 @@ const Login = () => {
             placeholder="Enter your password"
           />
         </label>
+        {error && <span className="text-red-500">{error}</span>}{' '}
         <Button className="border-2" type="submit" disabled={isDisabled}>
           {isDisabled ? (
             <span className="flex">

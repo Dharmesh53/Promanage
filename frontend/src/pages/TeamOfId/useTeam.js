@@ -6,7 +6,7 @@ import {
   deleteTeamMember,
   updateTeamInCharge,
   deleteTeam,
-} from './api'
+} from './api.js'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 

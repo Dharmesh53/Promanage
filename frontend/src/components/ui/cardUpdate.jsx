@@ -3,29 +3,29 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
+} from '@/components/ui/sheet'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Input } from './input';
-import { Label } from './label';
-import { format } from 'date-fns';
-import { SlCalender } from 'react-icons/sl';
-import { Calendar } from '@/components/ui/calendar';
-import { useState, useCallback } from 'react';
-import { Textarea } from './textarea';
-import { useSelector } from 'react-redux';
-import { Button } from './button';
-import axios from 'axios';
+} from '@/components/ui/popover'
+import { Input } from './input'
+import { Label } from './label'
+import { format } from 'date-fns'
+import { SlCalender } from 'react-icons/sl'
+import { Calendar } from '@/components/ui/calendar'
+import { useState, useCallback } from 'react'
+import { Textarea } from './textarea'
+import { useSelector } from 'react-redux'
+import { Button } from './button'
+import axios from 'axios'
 
 const CardUpdate = ({
   _id,
@@ -38,42 +38,45 @@ const CardUpdate = ({
   setCards,
   userBoard,
 }) => {
-  const [newTitle, setNewTitle] = useState(title);
-  const [newDescription, setNewDescription] = useState(description);
-  const [newAssignee, setNewAssignee] = useState(assignee?.email);
-  const [newPriority, setNewPriority] = useState(priority);
-  const [date, setDate] = useState(new Date(due));
-  const [newProgress, setNewProgress] = useState(progess);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [newTitle, setNewTitle] = useState(title)
+  const [newDescription, setNewDescription] = useState(description)
+  const [newAssignee, setNewAssignee] = useState(assignee?.email)
+  const [newPriority, setNewPriority] = useState(priority)
+  const [date, setDate] = useState(new Date(due))
+  const [newProgress, setNewProgress] = useState(progess)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const assigneeList = useSelector(
     (state) => state.project?.project?.project?.teams[0]?.users
-  );
+  )
 
   const findAssigneeByEmail = useCallback(
     (email) => assigneeList?.find((user) => user.email === email),
     [assigneeList]
-  );
+  )
 
   const handleUpdateTask = useCallback(
     async (e) => {
-      e.preventDefault();
-      setIsUpdating(true);
+      e.preventDefault()
+      setIsUpdating(true)
 
-      const assigneeObject = findAssigneeByEmail(newAssignee) || assignee;
+      const assigneeObject = findAssigneeByEmail(newAssignee) || assignee
 
       try {
-        await axios.put(`/api/task/updateTask/${_id}`, {
-          title: newTitle,
-          description: newDescription,
-          assignee: assigneeObject,
-          priority: newPriority,
-          due: date,
-          progess: newProgress,
-        });
+        await axios.put(
+          `https://promanage-8loe.onrender.com/api/task/updateTask/${_id}`,
+          {
+            title: newTitle,
+            description: newDescription,
+            assignee: assigneeObject,
+            priority: newPriority,
+            due: date,
+            progess: newProgress,
+          }
+        )
 
         setCards((cards) => {
-          const index = cards.findIndex((card) => card._id === _id);
+          const index = cards.findIndex((card) => card._id === _id)
           if (index !== -1) {
             const updatedCard = {
               ...cards[index],
@@ -83,24 +86,34 @@ const CardUpdate = ({
               priority: newPriority,
               progess: newProgress,
               due: date,
-            };
+            }
             const updatedCards = [
               ...cards.slice(0, index),
               updatedCard,
               ...cards.slice(index + 1),
-            ];
-            return updatedCards;
+            ]
+            return updatedCards
           }
-          return cards;
-        });
+          return cards
+        })
       } catch (error) {
-        console.error('Failed to update task:', error);
+        console.error('Failed to update task:', error)
       } finally {
-        setIsUpdating(false);
+        setIsUpdating(false)
       }
     },
-    [_id, newTitle, newDescription, newAssignee, newPriority, date, newProgress, findAssigneeByEmail, setCards]
-  );
+    [
+      _id,
+      newTitle,
+      newDescription,
+      newAssignee,
+      newPriority,
+      date,
+      newProgress,
+      findAssigneeByEmail,
+      setCards,
+    ]
+  )
 
   return (
     <SheetContent className="font-pops">
@@ -108,7 +121,10 @@ const CardUpdate = ({
         <SheetTitle>Edit Task</SheetTitle>
         <SheetDescription className="flex flex-col gap-2 text-black">
           <Label>Title</Label>
-          <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+          <Input
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+          />
 
           <Label>Description</Label>
           <Textarea
@@ -141,7 +157,11 @@ const CardUpdate = ({
           {!userBoard && (
             <>
               <Label htmlFor="newAssignee">Change Assignee</Label>
-              <Select name="newAssignee" value={newAssignee} onValueChange={setNewAssignee}>
+              <Select
+                name="newAssignee"
+                value={newAssignee}
+                onValueChange={setNewAssignee}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select assignee for task" />
                 </SelectTrigger>
@@ -190,8 +210,7 @@ const CardUpdate = ({
         </SheetDescription>
       </SheetHeader>
     </SheetContent>
-  );
-};
+  )
+}
 
-export default CardUpdate;
-
+export default CardUpdate

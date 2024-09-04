@@ -31,9 +31,13 @@ const Layout = () => {
   const getUser = useGetUser()
 
   const sendReq = async () => {
-    const res = await axios.post('/api/logout', null, {
-      withCredentials: true,
-    })
+    const res = await axios.post(
+      'https://promanage-8loe.onrender.com/api/logout',
+      null,
+      {
+        withCredentials: true,
+      }
+    )
     if (res.status == 200) {
       return res
     }

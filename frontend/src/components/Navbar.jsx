@@ -18,7 +18,9 @@ const Navbar = ({ user }) => {
   const location = useLocation()
 
   const handleTeams = async () => {
-    const res = await axios.get('/api/getUserTeams')
+    const res = await axios.get(
+      'https://promanage-8loe.onrender.com/api/getUserTeams'
+    )
     setTeams(res.data)
   }
 
