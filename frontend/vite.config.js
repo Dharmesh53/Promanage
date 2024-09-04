@@ -8,9 +8,9 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'https://promanage-backend-five.vercel.app',
+        target: 'https://promanage-8loe.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
     },
   },
