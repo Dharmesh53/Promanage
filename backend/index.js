@@ -21,16 +21,18 @@ app.use(morgan(":status :method :url - :response-time ms "));
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: process.env.MY_FRONTEND_URL,
-  },
+    cors: {
+        origin: process.env.MY_FRONTEND_URL,
+    },
 });
 
 configureRoutes(app);
 configureSocket(io);
 
-connectToDB().then(() => {
-  server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-});
+connectToDB();
+
+// connectToDB().then(() => {
+//   server.listen(port, () => {
+//     console.log(`Server running on port ${port}`);
+//   });
+// });
