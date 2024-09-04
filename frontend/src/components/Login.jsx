@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
@@ -11,8 +11,6 @@ import { Link } from 'react-router-dom'
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [image, setImage] = useState('https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/board_zffmew.png')
-  const [fade, setFade] = useState(false)
   const [data, setData] = useState({
     email: '',
     password: '',
@@ -25,28 +23,6 @@ const Login = () => {
       [e.target.name]: e.target.value,
     }))
   }
-
-  useEffect(() => {
-    const images = [
-      'https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/board_zffmew.png',
-      'https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/canvas_gt3qhk.png',
-      'https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/home_miei3s.png',
-    ]
-
-    let idx = 0
-
-    const id = setInterval(() => {
-      setFade(true)
-
-      setTimeout(() => {
-        setFade(false)
-        setImage(images[idx])
-        idx = ++idx % images.length
-      }, 600)
-    }, 3000)
-
-    return () => clearInterval(id)
-  }, [])
 
   const sendReq = async () => {
     try {
@@ -74,80 +50,70 @@ const Login = () => {
   }
 
   return (
-    <div className="w-full flex h-full overflow-hidden">
-      <div className="z-10  m-auto">
-        <span className="flex justify-center text-2xl">Login</span>
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-          <label htmlFor="email">
-            Email
-            <Input
-              name="email"
-              type="email"
-              className="outline mt-3"
-              value={data.email}
-              onChange={(e) => handleChange(e)}
-              placeholder="Enter your email"
-            />
-          </label>
-          <label htmlFor="password">
-            Password
-            <Input
-              name="password"
-              type="password"
-              className="outline mt-3"
-              value={data.password}
-              onChange={(e) => handleChange(e)}
-              placeholder="Enter your password"
-            />
-          </label>
-          <Button className="border-2" type="submit" disabled={isDisabled}>
-            {isDisabled ? (
-              <span className="flex">
-                <Loader2 className="animate-spin-reverse mr-2" /> Logging in..
-              </span>
-            ) : (
-              'Login'
-            )}
+    <>
+      <span className="flex justify-center text-2xl">Login</span>
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <label htmlFor="email">
+          Email
+          <Input
+            name="email"
+            type="email"
+            className="outline mt-3"
+            value={data.email}
+            onChange={(e) => handleChange(e)}
+            placeholder="Enter your email"
+          />
+        </label>
+        <label htmlFor="password">
+          Password
+          <Input
+            name="password"
+            type="password"
+            className="outline mt-3"
+            value={data.password}
+            onChange={(e) => handleChange(e)}
+            placeholder="Enter your password"
+          />
+        </label>
+        <Button className="border-2" type="submit" disabled={isDisabled}>
+          {isDisabled ? (
+            <span className="flex">
+              <Loader2 className="animate-spin-reverse mr-2" /> Logging in..
+            </span>
+          ) : (
+            'Login'
+          )}
+        </Button>
+        <div className="flex w-full gap-2">
+          <Button
+            variant="secondary"
+            className=""
+            onClick={() =>
+              setData({ email: 'demo1@test.com', password: 'demo1' })
+            }
+            disabled={isDisabled}
+          >
+            Use Demo account 1
           </Button>
-          <div className="flex w-full gap-2">
-            <Button
-              variant="secondary"
-              className="flex-grow"
-              onClick={() =>
-                setData({ email: 'demo1@test.com', password: 'demo1' })
-              }
-              disabled={isDisabled}
-            >
-              Use Demo account 1
-            </Button>
-            <Button
-              variant="secondary"
-              className="flex-grow"
-              onClick={() =>
-                setData({ email: 'demo2@test.com', password: 'demo2' })
-              }
-              disabled={isDisabled}
-            >
-              Use Demo account 2
-            </Button>
-          </div>
-        </form>
-        <span className="flex justify-center my-6 gap-2">
-          Don't have an Account
-          <Link to="/signup">
-            <span className="text-blue-700 underline"> Signup</span>
-          </Link>
-        </span>
-      </div>
-      <div className="pt-32 mr-[-40rem] scale-120 ">
-        <img
-          src={image}
-          alt="Board"
-          className={`transition-opacity fade-out-20 border rounded duration-1000 ${fade ? 'opacity-35' : 'opacity-100'
-            }`}
-        />
-      </div>
-    </div>
+          <Button
+            variant="secondary"
+            className=""
+            onClick={() =>
+              setData({ email: 'demo2@test.com', password: 'demo2' })
+            }
+            disabled={isDisabled}
+          >
+            Use Demo account 2
+          </Button>
+        </div>
+      </form>
+      <span className="flex justify-center my-6 gap-2">
+        Don't have an Account?
+        <Link to="/signup">
+          <span className="text-blue-700 underline"> Signup</span>
+        </Link>
+      </span>
+    </>
   )
 }
 

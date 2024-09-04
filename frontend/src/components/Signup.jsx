@@ -10,8 +10,10 @@ import { Loader2 } from 'lucide-react'
 const Signup = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [image, setImage] = useState(
+    'https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/board_zffmew.png'
+  )
   const [fade, setFade] = useState(false)
-  const [image, setImage] = useState('https://res.cloudinary.com/dkux7gsfb/image/upload/v1725445323/board_zffmew.png')
   const [data, setData] = useState({
     name: '',
     email: '',
@@ -74,69 +76,63 @@ const Signup = () => {
   }
 
   return (
-    <div className="w-full flex h-full overflow-hidden">
-      <div className="z-10  m-auto">
-        <span className="flex justify-center text-2xl">Sign Up</span>
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-          <label htmlFor="name">
-            Name
-            <Input
-              name="name"
-              type="text"
-              className="outline mt-3"
-              value={data.name}
-              onChange={(e) => handleChange(e)}
-              placeholder="Enter your name"
-            />
-          </label>
-          <label htmlFor="email">
-            Email
-            <Input
-              name="email"
-              type="email"
-              className="outline mt-3"
-              value={data.email}
-              onChange={(e) => handleChange(e)}
-              placeholder="Enter your email"
-            />
-          </label>
-          <label htmlFor="password">
-            Password
-            <Input
-              name="password"
-              type="password"
-              className="outline mt-3"
-              value={data.password}
-              onChange={(e) => handleChange(e)}
-              placeholder="Enter your password"
-            />
-          </label>
-          <Button className="border-2" type="submit" disabled={isDisabled}>
-            {isDisabled ? (
-              <span className="flex">
-                <Loader2 className="animate-spin-reverse mr-2" /> Signing up..
-              </span>
-            ) : (
-              'Create my account'
-            )}
-          </Button>
-        </form>
-        <span className="flex justify-center my-6 gap-2">
-          Already have an Account
-          <Link to="/">
-            <span className="text-blue-700 underline">Login</span>
-          </Link>
-        </span>
-      </div>
-      <div className="pt-32 mr-[-40rem] scale-120 ">
-        <img
-          src={image}
-          alt="Board"
-          className={`transition-opacity fade-out-20 border rounded duration-1000 ${fade ? 'opacity-35' : 'opacity-100'
-            }`}
-        />
-      </div>
-    </div>
+    <>
+      <span className="flex justify-center text-2xl">Sign up</span>
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <label htmlFor="name">
+          Name
+          <Input
+            name="name"
+            type="text"
+            className="outline mt-3"
+            value={data.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+          />
+        </label>
+        <label htmlFor="email">
+          Email
+          <Input
+            name="email"
+            type="email"
+            className="outline mt-3"
+            value={data.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+          />
+        </label>
+        <label htmlFor="password">
+          Password
+          <Input
+            name="password"
+            type="password"
+            className="outline mt-3"
+            value={data.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+          />
+        </label>
+        <Button
+          className="border-2 min-w-[22rem]"
+          type="submit"
+          disabled={isDisabled}
+        >
+          {isDisabled ? (
+            <span className="flex">
+              <Loader2 className="animate-spin-reverse mr-2" /> Signing up..
+            </span>
+          ) : (
+            'Create my account'
+          )}
+        </Button>
+      </form>
+      <span className="flex justify-center my-6 gap-2">
+        Already have an Account?
+        <Link to="/">
+          <span className="text-blue-700 underline"> Login</span>
+        </Link>
+      </span>
+    </>
   )
 }
 

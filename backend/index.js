@@ -14,7 +14,7 @@ const configureSocket = require("./server/socket");
 const port = process.env.PORT || 5000;
 const app = express();
 
-app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL }));
+app.use(cors({ credentials: true, origin: process.env.MY_FRONTEND_URL }));
 app.use(cookieParser());
 app.use(express.json()); //order matter in middlewares
 app.use(morgan(":status :method :url - :response-time ms "));
@@ -22,7 +22,7 @@ app.use(morgan(":status :method :url - :response-time ms "));
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.MY_FRONTEND_URL,
   },
 });
 

@@ -10,402 +10,402 @@ const Cache = require("../utils/Cache");
 const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const createProject = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-  try {
-    const { title, teamId, createdBy } = req.body;
+    try {
+        const { title, teamId, createdBy } = req.body;
 
-    const project = new Project({
-      title,
-      teams: [teamId],
-      createdBy,
-    });
+        const project = new Project({
+            title,
+            teams: [teamId],
+            createdBy,
+        });
 
-    await project.save({ session });
+        await project.save({ session });
 
-    const team = await Team.findByIdAndUpdate(
-      teamId,
-      {
-        $push: { projects: project._id },
-      },
-      { new: true, session }
-    );
+        const team = await Team.findByIdAndUpdate(
+            teamId,
+            {
+                $push: { projects: project._id },
+            },
+            { new: true, session }
+        );
 
-    await Promise.all(
-      team?.users.map((user) =>
-        User.findByIdAndUpdate(
-          user,
-          {
-            $push: { projects: project._id },
-          },
-          { session }
-        )
-      )
-    );
+        await Promise.all(
+            team?.users.map((user) =>
+                User.findByIdAndUpdate(
+                    user,
+                    {
+                        $push: { projects: project._id },
+                    },
+                    { session }
+                )
+            )
+        );
 
-    await session.commitTransaction();
-    session.endSession();
+        await session.commitTransaction();
+        session.endSession();
 
-    return res.status(201).json({ msg: "done" });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+        return res.status(201).json({ msg: "done" });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
 
-    return res.status(500).json({ msg: error.message });
-  }
+        return res.status(500).json({ msg: error.message });
+    }
 };
 
 const getProject = async (req, res) => {
-  try {
-    const userEmail = req.email;
-    const id = req.params.id;
-    const project = await Project.findById(id)
-      .populate({
-        path: "teams",
-        populate: {
-          path: "users",
-        },
-      })
-      .populate("tasks");
-    if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+    try {
+        const userEmail = req.email;
+        const id = req.params.id;
+        const project = await Project.findById(id)
+            .populate({
+                path: "teams",
+                populate: {
+                    path: "users",
+                },
+            })
+            .populate("tasks");
+        if (!project) {
+            return res.status(404).json({ msg: "Project not found" });
+        }
+        //if (project.createdBy !== userEmail) {
+        //  console.log(project.createdBy, userEmail);
+        //  return res.status(400).json({ msg: "You sneaky little bastard" });
+        //}
+        return res.status(200).json({ project: project });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({ msg: error.message });
     }
-    //if (project.createdBy !== userEmail) {
-    //  console.log(project.createdBy, userEmail);
-    //  return res.status(400).json({ msg: "You sneaky little bastard" });
-    //}
-    return res.status(200).json({ project: project });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    return res.status(500).json({ msg: error.message });
-  }
 };
 
 const updateProject = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { title, description, progess } = req.body;
-    const updatedProject = await Project.findByIdAndUpdate(
-      id,
-      {
-        title,
-        description,
-        progess,
-      },
-      { new: true }
-    );
-    console.log(updateProject);
-    return res.status(200).json({ msg: "done" });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    return res.status(200).json({ msg: error.message });
-  }
+    try {
+        const id = req.params.id;
+        const { title, description, progess } = req.body;
+        const updatedProject = await Project.findByIdAndUpdate(
+            id,
+            {
+                title,
+                description,
+                progess,
+            },
+            { new: true }
+        );
+        console.log(updateProject);
+        return res.status(200).json({ msg: "done" });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(200).json({ msg: error.message });
+    }
 };
 
 const addNewTeam = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { teamId } = req.body;
-    const project = await Project.findById(id);
+    try {
+        const id = req.params.id;
+        const { teamId } = req.body;
+        const project = await Project.findById(id);
 
-    if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+        if (!project) {
+            return res.status(404).json({ msg: "Project not found" });
+        }
+
+        if (project.teams.includes(teamId)) {
+            return res.status(400).json({ msg: "Team already exists in project" });
+        }
+
+        await Project.findByIdAndUpdate(id, { $addToSet: { teams: teamId } });
+
+        await Team.findByIdAndUpdate(teamId, {
+            $addToSet: { projects: id },
+        });
+
+        const team = await Team.findById(teamId).populate(
+            "users",
+            "_id name email"
+        );
+
+        team.users.forEach((user) => {
+            userEmailSender(user.name, team.title, project.title);
+        });
+
+        return res.status(200).json({ msg: "Team added to project" });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({ msg: error.message });
     }
-
-    if (project.teams.includes(teamId)) {
-      return res.status(400).json({ msg: "Team already exists in project" });
-    }
-
-    await Project.findByIdAndUpdate(id, { $addToSet: { teams: teamId } });
-
-    await Team.findByIdAndUpdate(teamId, {
-      $addToSet: { projects: id },
-    });
-
-    const team = await Team.findById(teamId).populate(
-      "users",
-      "_id name email"
-    );
-
-    team.users.forEach((user) => {
-      userEmailSender(user.name, team.title, project.title);
-    });
-
-    return res.status(200).json({ msg: "Team added to project" });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    return res.status(500).json({ msg: error.message });
-  }
 };
 
 const createProjectTask = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-  try {
-    const id = req.query.id;
+    try {
+        const id = req.query.id;
 
-    const { title, status, assigneeObject, due, priority, createdBy } =
-      req.body;
+        const { title, status, assigneeObject, due, priority, createdBy } =
+            req.body;
 
-    const taskData = {
-      title,
-      status,
-      assignee: assigneeObject,
-      due,
-      priority,
-      createdBy,
-    };
+        const taskData = {
+            title,
+            status,
+            assignee: assigneeObject,
+            due,
+            priority,
+            createdBy,
+        };
 
-    if (id !== "nope") taskData.project = id;
+        if (id !== "nope") taskData.project = id;
 
-    const task = new Task(taskData);
-    await task.save();
+        const task = new Task(taskData);
+        await task.save();
 
-    await User.findOneAndUpdate(
-      { email: assigneeObject.email },
-      { $push: { tasks: task._id } }
-    ).session(session);
+        await User.findOneAndUpdate(
+            { email: assigneeObject.email },
+            { $push: { tasks: task._id } }
+        ).session(session);
 
-    if (id !== "nope") {
-      var updatedProject = await Project.findByIdAndUpdate(
-        id,
-        {
-          $push: { tasks: task._id },
-        },
-        { new: true }
-      ).session(session);
+        if (id !== "nope") {
+            var updatedProject = await Project.findByIdAndUpdate(
+                id,
+                {
+                    $push: { tasks: task._id },
+                },
+                { new: true }
+            ).session(session);
 
-      taskEmailSender(task, updatedProject.title);
+            taskEmailSender(task, updatedProject.title);
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({ task });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({ msg: error.message });
     }
-
-    await session.commitTransaction();
-    session.endSession();
-
-    return res.status(200).json({ task });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    return res.status(500).json({ msg: error.message });
-  }
 };
 
 const updateProjectTask = async (req, res) => {
-  // keep these 2 lines out of try and catch
-  const session = await mongoose.startSession();
-  session.startTransaction();
+    // keep these 2 lines out of try and catch
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-  try {
-    const id = req.params.id;
-    const cards = req.body;
+    try {
+        const id = req.params.id;
+        const cards = req.body;
 
-    const project = await Project.findById(id).session(session);
+        const project = await Project.findById(id).session(session);
 
-    if (!project) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ msg: "Project not found" });
-    }
+        if (!project) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ msg: "Project not found" });
+        }
 
-    const newCards = cards.map((card) => card._id);
+        const newCards = cards.map((card) => card._id);
 
-    let deletedCards = project.tasks.filter(
-      (task) => !newCards.includes(String(task))
-    );
+        let deletedCards = project.tasks.filter(
+            (task) => !newCards.includes(String(task))
+        );
 
-    deletedCards = deletedCards.map((task) => String(task));
+        deletedCards = deletedCards.map((task) => String(task));
 
-    let remainingCards = project.tasks.filter((task) =>
-      newCards.includes(String(task))
-    );
+        let remainingCards = project.tasks.filter((task) =>
+            newCards.includes(String(task))
+        );
 
-    remainingCards = remainingCards.map((task) => String(task));
+        remainingCards = remainingCards.map((task) => String(task));
 
-    project.tasks = [...remainingCards];
+        project.tasks = [...remainingCards];
 
-    for (let i = 0; i < deletedCards.length; i++) {
-      const deletedCard = await Task.findById(
-        new ObjectId(deletedCards[i])
-      ).session(session);
+        for (let i = 0; i < deletedCards.length; i++) {
+            const deletedCard = await Task.findById(
+                new ObjectId(deletedCards[i])
+            ).session(session);
 
-      if (!deletedCard) {
+            if (!deletedCard) {
+                await session.abortTransaction();
+                session.endSession();
+                return res
+                    .status(404)
+                    .json({ msg: `Task with ID ${deletedCards[i]} not found` });
+            }
+
+            const email = deletedCard.assignee.email;
+
+            let user = await User.findOne({ email }).session(session);
+
+            let updatedTasks = user.tasks.filter(
+                (task) => String(task) !== deletedCards[i]
+            );
+
+            user.tasks = [...updatedTasks];
+
+            await user.save();
+
+            await Task.findByIdAndDelete(deletedCards[i]).session(session);
+        }
+
+        for (let i = 0; i < remainingCards.length; i++) {
+            const completeCard = cards.find((card) =>
+                remainingCards.includes(String(card._id))
+            );
+
+            delete completeCard._id;
+
+            await Task.findOneAndReplace(
+                { _id: remainingCards[i] },
+                completeCard
+            ).session(session);
+        }
+
+        await project.save();
+
+        await session.commitTransaction();
+
+        session.endSession();
+
+        return res.status(200).json({ msg: "done" });
+    } catch (error) {
         await session.abortTransaction();
         session.endSession();
-        return res
-          .status(404)
-          .json({ msg: `Task with ID ${deletedCards[i]} not found` });
-      }
-
-      const email = deletedCard.assignee.email;
-
-      let user = await User.findOne({ email }).session(session);
-
-      let updatedTasks = user.tasks.filter(
-        (task) => String(task) !== deletedCards[i]
-      );
-
-      user.tasks = [...updatedTasks];
-
-      await user.save();
-
-      await Task.findByIdAndDelete(deletedCards[i]).session(session);
+        return res.status(500).json({ msg: error.message });
     }
-
-    for (let i = 0; i < remainingCards.length; i++) {
-      const completeCard = cards.find((card) =>
-        remainingCards.includes(String(card._id))
-      );
-
-      delete completeCard._id;
-
-      await Task.findOneAndReplace(
-        { _id: remainingCards[i] },
-        completeCard
-      ).session(session);
-    }
-
-    await project.save();
-
-    await session.commitTransaction();
-
-    session.endSession();
-
-    return res.status(200).json({ msg: "done" });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    return res.status(500).json({ msg: error.message });
-  }
 };
 
 const deleteProjectTeam = async (req, res) => {
-  try {
-    const { pid: projectId, tid: teamId } = req.params;
-    const code = req.query.code;
-    const project = await Project.findById(projectId);
-    const team = await Team.findById(teamId).populate("users");
+    try {
+        const { pid: projectId, tid: teamId } = req.params;
+        const code = req.query.code;
+        const project = await Project.findById(projectId);
+        const team = await Team.findById(teamId).populate("users");
 
-    if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
-    }
-    if (!project.teams.includes(teamId)) {
-      return res.status(400).json({ msg: "Team not found in project" });
-    }
-    let teamMembers = team.users.map((user) => user.email);
-
-    if (code == 1) {
-      project.tasks.forEach(async (task) => {
-        let taskDetails = await Task.findById(task);
-        if (
-          taskDetails?.assignee?.email &&
-          teamMembers.includes(taskDetails.assignee.email)
-        ) {
-          await Task.findByIdAndDelete(task);
+        if (!project) {
+            return res.status(404).json({ msg: "Project not found" });
         }
-      });
-    }
-    if (code == 2) {
-      project.tasks.forEach(async (task) => {
-        let taskDetails = await Task.findById(task);
-        if (teamMembers.includes(taskDetails.assignee.email)) {
-          taskDetails.assignee = { name: "", email: "" };
-          await taskDetails.save();
+        if (!project.teams.includes(teamId)) {
+            return res.status(400).json({ msg: "Team not found in project" });
         }
-      });
-    }
+        let teamMembers = team.users.map((user) => user.email);
 
-    await Project.findByIdAndUpdate(projectId, { $pull: { teams: teamId } });
-    return res.status(200).json({ msg: "done" });
-  } catch (error) {
-    return res.status(500).json({ msg: error.message });
-  }
+        if (code == 1) {
+            project.tasks.forEach(async (task) => {
+                let taskDetails = await Task.findById(task);
+                if (
+                    taskDetails?.assignee?.email &&
+                    teamMembers.includes(taskDetails.assignee.email)
+                ) {
+                    await Task.findByIdAndDelete(task);
+                }
+            });
+        }
+        if (code == 2) {
+            project.tasks.forEach(async (task) => {
+                let taskDetails = await Task.findById(task);
+                if (teamMembers.includes(taskDetails.assignee.email)) {
+                    taskDetails.assignee = { name: "", email: "" };
+                    await taskDetails.save();
+                }
+            });
+        }
+
+        await Project.findByIdAndUpdate(projectId, { $pull: { teams: teamId } });
+        return res.status(200).json({ msg: "done" });
+    } catch (error) {
+        return res.status(500).json({ msg: error.message });
+    }
 };
 
 const updateProjectFiles = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const urls = req.body;
-    await Project.findByIdAndUpdate(id, { $push: { files: urls } });
+    try {
+        const { id } = req.params;
+        const urls = req.body;
+        await Project.findByIdAndUpdate(id, { $push: { files: urls } });
 
-    return res.status(200).json({ msg: "done" });
-  } catch (error) {
-    return res.status(500).json({ msg: error.message });
-  }
+        return res.status(200).json({ msg: "done" });
+    } catch (error) {
+        return res.status(500).json({ msg: error.message });
+    }
 };
 
 const deleteProject = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-  const s3Client = new S3Client({
-    region: process.env.AWS_BUCKET_REGION,
+    const s3Client = new S3Client({
+        region: process.env.MY_AWS_BUCKET_REGION,
 
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECERT_ACCESS_KEY,
-    },
-  });
-
-  try {
-    const { id } = req.params;
-
-    const project = await Project.findById(id).session(session);
-
-    for (const taskId of project.tasks) {
-      const task = await Task.findById(taskId).session(session);
-
-      if (task && task.assignee) {
-        await User.findOneAndUpdate(
-          { email: task.assignee.email },
-          {
-            $pull: { tasks: taskId, projects: id },
-          },
-          { session }
-        );
-      }
-
-      await Task.findByIdAndDelete(taskId, { session });
-    }
-
-    for (const teamId of project.teams) {
-      await Team.findByIdAndUpdate(
-        teamId,
-        {
-          $pull: { projects: id },
+        credentials: {
+            accessKeyId: process.env.MY_AWS_ACCESS_KEY,
+            secretAccessKey: process.env.MY_AWS_SECERT_ACCESS_KEY,
         },
-        { session }
-      );
-    }
-
-    const command = new DeleteObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: `/${String(id)}`,
     });
 
-    await s3Client.send(command);
+    try {
+        const { id } = req.params;
 
-    await Project.findByIdAndDelete(id).session(session);
+        const project = await Project.findById(id).session(session);
 
-    session.commitTransaction();
-    return res.status(200).json({ msg: "done" });
-  } catch (error) {
-    session.abortTransaction();
-    return res.status(500).json({ msg: error.message });
-  }
+        for (const taskId of project.tasks) {
+            const task = await Task.findById(taskId).session(session);
+
+            if (task && task.assignee) {
+                await User.findOneAndUpdate(
+                    { email: task.assignee.email },
+                    {
+                        $pull: { tasks: taskId, projects: id },
+                    },
+                    { session }
+                );
+            }
+
+            await Task.findByIdAndDelete(taskId, { session });
+        }
+
+        for (const teamId of project.teams) {
+            await Team.findByIdAndUpdate(
+                teamId,
+                {
+                    $pull: { projects: id },
+                },
+                { session }
+            );
+        }
+
+        const command = new DeleteObjectCommand({
+            Bucket: process.env.MY_AWS_BUCKET_NAME,
+            Key: `/${String(id)}`,
+        });
+
+        await s3Client.send(command);
+
+        await Project.findByIdAndDelete(id).session(session);
+
+        session.commitTransaction();
+        return res.status(200).json({ msg: "done" });
+    } catch (error) {
+        session.abortTransaction();
+        return res.status(500).json({ msg: error.message });
+    }
 };
 
 module.exports = {
-  createProject,
-  getProject,
-  updateProject,
-  createProjectTask,
-  updateProjectTask,
-  addNewTeam,
-  deleteProjectTeam,
-  updateProjectFiles,
-  deleteProject,
+    createProject,
+    getProject,
+    updateProject,
+    createProjectTask,
+    updateProjectTask,
+    addNewTeam,
+    deleteProjectTeam,
+    updateProjectFiles,
+    deleteProject,
 };

@@ -9,7 +9,7 @@ const verifyToken = async (req, res, next) => {
             res.status(404).json({ msg: "Token not found !!" });
         }
 
-        jwt.verify(String(token), process.env.JWT_SECERT, (err, data) => {
+        jwt.verify(String(token), process.env.MY_JWT_SECERT, (err, data) => {
             if (err) {
                 return res.status(400).json({ msg: "Invalid Token" });
             }
