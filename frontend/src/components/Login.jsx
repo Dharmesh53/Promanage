@@ -7,10 +7,12 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useToast } from '@/components/ui/use-toast'
 
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [data, setData] = useState({
     email: '',
     password: '',
@@ -45,6 +47,12 @@ const Login = () => {
     if (user) {
       dispatch(login())
       navigate('/')
+    } else {
+      toast({
+        variant: 'destructive',
+        className: 'bg-red-400 p-2',
+        title: 'Sonething went wrong!! Try again',
+      })
     }
     setIsDisabled(false)
   }
