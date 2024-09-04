@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux'
 import { login } from '../store/authSlice'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
+import { Loader2 } from 'lucide-react'
 
 const Signup = () => {
   const dispatch = useDispatch()
@@ -42,10 +43,11 @@ const Signup = () => {
         setImage(images[idx])
         idx = ++idx % images.length
       }, 600)
-    }, 2200)
+    }, 3000)
 
     return () => clearInterval(id)
   }, [])
+
   const sendReq = async () => {
     try {
       const userData = {
@@ -53,9 +55,7 @@ const Signup = () => {
         email: data.email,
         password: data.password,
       }
-      const res = await axios
-        .post('/api/signup', userData)
-        .catch((e) => console.log(e))
+      const res = await axios.post('/api/signup', userData)
       const result = await res.data
       return result
     } catch (error) {
@@ -65,16 +65,18 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsDisabled(true)
     const user = await sendReq()
     if (user) {
       dispatch(login())
       navigate('/')
     }
+    setIsDisabled(false)
   }
 
   return (
-    <div className="w-[40%] flex h-full">
-      <div className="z-10 w-2/3 m-auto">
+    <div className="w-full flex h-full overflow-hidden">
+      <div className="z-10  m-auto">
         <span className="flex justify-center text-2xl">Sign Up</span>
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <label htmlFor="name">
@@ -110,8 +112,14 @@ const Signup = () => {
               placeholder="Enter your password"
             />
           </label>
-          <Button className="border-2" type="submit">
-            Sign up
+          <Button className="border-2" type="submit" disabled={isDisabled}>
+            {isDisabled ? (
+              <span className="flex">
+                <Loader2 className="animate-spin-reverse mr-2" /> Signing up..
+              </span>
+            ) : (
+              'Create my account'
+            )}
           </Button>
         </form>
         <span className="flex justify-center my-6 gap-2">
@@ -121,13 +129,15 @@ const Signup = () => {
           </Link>
         </span>
       </div>
-      <img
-        src={image}
-        alt="Board"
-        className={`absolute right-[-40%] top-[10%] rounded border fade-out-20 transition-opacity duration-1000 ${
-          fade ? 'opacity-35' : 'opacity-100'
-        }`}
-      />
+      <div className="pt-32 mr-[-40rem] scale-120 ">
+        <img
+          src={image}
+          alt="Board"
+          className={`transition-opacity fade-out-20 border rounded duration-1000 ${
+            fade ? 'opacity-35' : 'opacity-100'
+          }`}
+        />
+      </div>
     </div>
   )
 }

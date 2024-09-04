@@ -2,9 +2,9 @@ import { Outlet } from 'react-router-dom'
 
 const Layout = () => {
   return (
-    <div className="flex flex-col h-screen font-pops bg-white">
+    <div className="flex flex-col h-screen font-pops bg-white overflow-hidden">
       <div className="flex justify-center border-b text-lg">ProManage</div>
-      <div className="w-full h-full overflow-hidden">
+      <div className="w-full h-full">
         <Outlet />
       </div>
     </div>

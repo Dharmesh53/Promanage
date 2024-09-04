@@ -43,7 +43,7 @@ const Login = () => {
         setImage(images[idx])
         idx = ++idx % images.length
       }, 600)
-    }, 2200)
+    }, 3000)
 
     return () => clearInterval(id)
   }, [])
@@ -74,8 +74,8 @@ const Login = () => {
   }
 
   return (
-    <div className="w-[40%] flex h-full">
-      <div className="z-10 w-2/3 m-auto">
+    <div className="w-full flex h-full overflow-hidden">
+      <div className="z-10  m-auto">
         <span className="flex justify-center text-2xl">Login</span>
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <label htmlFor="email">
@@ -139,13 +139,15 @@ const Login = () => {
           </Link>
         </span>
       </div>
-      <img
-        src={image}
-        alt="Board"
-        className={`absolute right-[-40%] top-[10%] rounded border fade-out-20 transition-opacity duration-1000 ${
-          fade ? 'opacity-35' : 'opacity-100'
-        }`}
-      />
+      <div className="pt-32 mr-[-40rem] scale-120 ">
+        <img
+          src={image}
+          alt="Board"
+          className={`transition-opacity fade-out-20 border rounded duration-1000 ${
+            fade ? 'opacity-35' : 'opacity-100'
+          }`}
+        />
+      </div>
     </div>
   )
 }
