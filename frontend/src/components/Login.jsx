@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom'
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [image, setImage] = useState('../../assets/board.png')
+  const [image, setImage] = useState('../../public/board.png')
   const [fade, setFade] = useState(false)
   const [data, setData] = useState({
     email: '',
@@ -28,9 +28,9 @@ const Login = () => {
 
   useEffect(() => {
     const images = [
-      '../../assets/board.png',
-      '../../assets/canvas.png',
-      '../../assets/home.png',
+      '../../public/board.png',
+      '../../public/canvas.png',
+      '../../public/home.png',
     ]
 
     let idx = 0
@@ -143,9 +143,8 @@ const Login = () => {
         <img
           src={image}
           alt="Board"
-          className={`transition-opacity fade-out-20 border rounded duration-1000 ${
-            fade ? 'opacity-35' : 'opacity-100'
-          }`}
+          className={`transition-opacity fade-out-20 border rounded duration-1000 ${fade ? 'opacity-35' : 'opacity-100'
+            }`}
         />
       </div>
     </div>

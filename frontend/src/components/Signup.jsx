@@ -11,7 +11,7 @@ const Signup = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [fade, setFade] = useState(false)
-  const [image, setImage] = useState('../../assets/board.png')
+  const [image, setImage] = useState('../../public/board.png')
   const [data, setData] = useState({
     name: '',
     email: '',
@@ -28,9 +28,9 @@ const Signup = () => {
 
   useEffect(() => {
     const images = [
-      '../../assets/board.png',
-      '../../assets/canvas.png',
-      '../../assets/home.png',
+      '../../public/board.png',
+      '../../public/canvas.png',
+      '../../public/home.png',
     ]
 
     let idx = 0
@@ -133,9 +133,8 @@ const Signup = () => {
         <img
           src={image}
           alt="Board"
-          className={`transition-opacity fade-out-20 border rounded duration-1000 ${
-            fade ? 'opacity-35' : 'opacity-100'
-          }`}
+          className={`transition-opacity fade-out-20 border rounded duration-1000 ${fade ? 'opacity-35' : 'opacity-100'
+            }`}
         />
       </div>
     </div>

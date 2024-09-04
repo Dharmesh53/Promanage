@@ -8,9 +8,8 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://promanage-backend-i7zo.onrender.com',
         changeOrigin: true,
-        // secure: false,
       },
     },
   },
@@ -18,5 +17,8 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  build: {
+    sourcemap: false,
   },
 })
